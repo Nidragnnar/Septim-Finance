@@ -1,0 +1,14 @@
+{
+  "name": "Meu painel de finanças",
+  "short_name": "Painel",
+  "description": "Gastos do dia a dia, contas fixas, parcelas e reserva do mês.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#EAEDF1",
+  "theme_color": "#0F3B44",
+  "lang": "pt-BR",
+  "icons": [
+    { "src": "icone.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
