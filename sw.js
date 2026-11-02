@@ -1,7 +1,7 @@
 // Cache só do essencial, e só do próprio site (as conversas com o Drive
 // passam direto). Rede primeiro: com sinal você pega sempre a versão nova;
 // sem sinal, o cache abre o painel.
-const VERSAO = 'painel-v3';
+const VERSAO = 'painel-v4';
 const ARQUIVOS = ['./', './index.html', './manifest.webmanifest', './icone.svg'];
 
 self.addEventListener('install', e => {

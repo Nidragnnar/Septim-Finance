@@ -51,6 +51,19 @@ Clique em **Implantar** e copie o **URL do app da Web** (termina em `/exec`).
 
 > O link carrega a chave: trate como senha. Mande só para você.
 
+### Se não conectar
+
+O painel mostra o motivo logo abaixo do botão **Conectar**. Os casos mais comuns:
+
+| O painel diz | O que fazer |
+|---|---|
+| endereço de teste (/dev) | Use o **URL do app da Web**, que termina em `/exec` (Implantar → Gerenciar implantações). |
+| O Google bloqueou a conversa | Em Gerenciar implantações, **Quem pode acessar** precisa ser **Qualquer pessoa** — não "Qualquer pessoa com Conta do Google". Abrir o `/exec` no seu navegador funciona mesmo com a opção errada, porque você está logado; o painel não está. |
+| recusou a chave | A chave do painel e a da linha `const CHAVE` precisam ser iguais. Depois de colar, salve e publique uma **nova versão** (abaixo): a implantação guarda o código do momento em que foi feita. |
+| não respondeu como o script | Confira se colou o URL certo e se o código é o do `Codigo.gs`; publique nova versão. |
+
+Não rode `doPost` pelo editor (nem pela Depuração): ele só funciona quando o painel chama. Para autorizar, rode `testar`.
+
 ### Se alterar o script depois
 
 Para manter o mesmo endereço: **Implantar → Gerenciar implantações → lápis → Versão: Nova versão → Implantar**. Criar uma *nova implantação* gera outro URL, e aí é preciso reconectar os aparelhos.
