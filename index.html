@@ -221,6 +221,22 @@
   .abrir{background:transparent; border:0; color:var(--roxo-link); font-weight:600; font-size:13px; padding:0; text-align:left}
   .abrir:hover{text-decoration:underline}
   .linha-botoes{display:flex; gap:8px; flex-wrap:wrap}
+
+  dialog#extrato{width:min(660px, calc(100% - 24px)); max-height:88vh; padding:0; border:1px solid var(--line); border-radius:14px; background:var(--surface); color:var(--ink); display:none; flex-direction:column}
+  dialog#extrato[open]{display:flex}
+  dialog#extrato::backdrop{background:rgba(12,6,24,.6)}
+  dialog#extrato > header{display:flex; justify-content:space-between; align-items:center; padding:13px 16px; border-bottom:1px solid var(--line-soft)}
+  .ex-resumo{margin:0; padding:10px 16px; background:var(--sub); border-bottom:1px solid var(--line-soft)}
+  #exLista{overflow:auto; flex:1}
+  li.ex{display:grid; grid-template-columns:44px 1fr auto; gap:4px 10px; align-items:center; padding:9px 16px; border-bottom:1px solid var(--line-soft)}
+  li.ex .ex-dia{font-size:12px; color:var(--ink-3)}
+  li.ex .ex-nome{min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:13.5px}
+  li.ex .ex-nome small{display:block; color:var(--ink-3); font-size:11.5px}
+  li.ex .val.ent{color:var(--pos)}
+  li.ex select{grid-column:2/-1; padding:5px 8px; font-size:13px}
+  li.ex .ex-motivo{grid-column:2/-1; font-size:11.5px; color:var(--ouro-txt)}
+  li.ex.ign .ex-nome, li.ex.ign .val{opacity:.5}
+  dialog#extrato footer{display:flex; justify-content:flex-end; gap:8px; padding:12px 16px; border-top:1px solid var(--line-soft)}
   .n-status{margin:0; padding:9px 11px; border-radius:8px; font-size:13px; line-height:1.4; background:var(--neutro-bg); color:var(--ink-2)}
   .n-status.erro{background:var(--dang-bg); color:var(--dang)}
   .n-status.ocupado{background:var(--warn-bg); color:var(--warn)}
@@ -422,6 +438,12 @@
             <button class="ghost" id="nSair">Desconectar</button>
           </div>
 
+          <div style="margin-bottom:12px">
+            <button class="ghost" id="abrirExtrato" style="width:100%">Importar extrato do banco (OFX ou CSV)</button>
+            <input type="file" id="arqExtrato" accept=".ofx,.csv,.txt" hidden>
+            <span class="tiny muted" style="display:block; margin-top:6px">Você revisa tudo antes de lançar. O arquivo é lido só neste aparelho.</span>
+          </div>
+
           <div class="linha-botoes">
             <button class="ghost" id="sincronizar">Buscar atualizações</button>
             <button class="ghost" id="backup">Exportar cópia</button>
@@ -433,6 +455,13 @@
     </div>
   </div>
 </div>
+
+<dialog id="extrato" aria-labelledby="exTitulo">
+  <header><h2 id="exTitulo">Importar extrato</h2><button class="x" id="exFechar" aria-label="Fechar">×</button></header>
+  <p class="tiny muted ex-resumo" id="exResumo"></p>
+  <ul id="exLista"></ul>
+  <footer><button class="ghost" id="exCancelar">Cancelar</button><button class="add" id="exAplicar">Lançar</button></footer>
+</dialog>
 
 <div class="aviso" id="aviso" role="status" hidden><span id="avisoTxt"></span><button id="avisoDesfazer">Desfazer</button></div>
 
@@ -1522,6 +1551,157 @@ $('backup').onclick = () => {
   a.click(); URL.revokeObjectURL(a.href);
 };
 $('restaurar').onclick = () => $('arquivo').click();
+/* ================= extrato do banco (OFX ou CSV) =================
+   lido só neste aparelho; vira lançamento apenas o que você aprovar na revisão.
+   cada linha ganha um id tirado de data + valor + nome: importar o mesmo período de novo não duplica. */
+const semAcento = s => String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+const hashTxt = s => { let h = 2166136261; for(const ch of s){ h ^= ch.codePointAt(0); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
+const lerTexto = buf => { try{ return new TextDecoder('utf-8', {fatal:true}).decode(buf); } catch(e){ return new TextDecoder('windows-1252').decode(buf); } };
+
+// cada linha: {data:'2026-10-17', valor (negativo = saída), nome, hist}
+function lerOFX(txt){
+  return [...txt.matchAll(/<STMTTRN>([\s\S]*?)(?=<\/STMTTRN>|<STMTTRN>|<\/BANKTRANLIST>)/gi)].map(([, b]) => {
+    const tag = t => ((b.match(new RegExp('<' + t + '>([^<\\r\\n]*)', 'i')) || [])[1] || '').trim();
+    const d = tag('DTPOSTED'), memo = tag('MEMO');
+    return {data:`${d.slice(0,4)}-${d.slice(4,6)}-${d.slice(6,8)}`, valor:parseFloat(tag('TRNAMT').replace(',', '.')), nome:tag('NAME') || memo, hist:memo.split(':')[0]};
+  });
+}
+function lerCSV(txt){
+  const linhas = txt.split(/\r?\n/).map(l => l.split(';').map(c => c.trim()));
+  const ic = linhas.findIndex(l => l.some(c => /^data/.test(semAcento(c))) && l.some(c => /^valor/.test(semAcento(c))));
+  if(ic < 0) return [];
+  const cab = linhas[ic].map(semAcento), col = re => cab.findIndex(c => re.test(c));
+  const cData = col(/^data/), cValor = col(/^valor/), cDesc = col(/^descri/), cHist = col(/^histor/);
+  return linhas.slice(ic+1).filter(l => /^\d{2}\/\d{2}\/\d{4}$/.test(l[cData] || '')).map(l => {
+    const [d, m, a] = l[cData].split('/');
+    return {data:`${a}-${m}-${d}`, valor:parseFloat(String(l[cValor]).replace(/\./g, '').replace(',', '.')),
+      nome:l[cDesc >= 0 ? cDesc : cHist] || '', hist:cHist >= 0 ? l[cHist] : ''};
+  });
+}
+
+// categoria pelo nome do estabelecimento
+const REGRAS = [
+  ['transporte', /posto|combust|shell|ipiranga|petro|uber|\b99\b|estacion|pedagio|mecanic|oficina|pneu|auto pecas/],
+  ['mercado',    /supermerc|mercado|atacad|acougue|hortifrut|padaria|panific|pan e conf|confeit|sacolao/],
+  ['comidafora', /drive|lanch|pizz|burger|ifood|restaur|\bbar\b|dog|sorvet|acai|cafe|churras|sushi/],
+  ['saude',      /farmac|drogar|droga|clinic|hospital|laborat|odonto|medic/],
+  ['casa',       /power net|internet|copel|energia|sanepar|sabesp|agua|aluguel|condomin/],
+  ['lazer',      /cinema|steam|netflix|spotify|\bgames?\b|playstation|xbox|ingresso/],
+];
+const palavras = s => semAcento(s).split(/[^a-z0-9]+/).filter(w => w.length >= 4);
+const pareceNome = (nome, txt) => palavras(nome).some(w => semAcento(txt).includes(w));
+const nomeLimpo = (nome, hist) => {
+  const n = String(nome).split(/\s{2,}/)[0].trim(), h = semAcento(hist);
+  return /^pix/.test(h) ? 'Pix · ' + n : /recarga/.test(h) ? 'Recarga ' + n : n;
+};
+
+let imp = null;   // importação em revisão
+function montarExtrato(brutas){
+  const vistos = {}, usadas = new Set();
+  const itens = brutas.filter(b => /^\d{4}-\d{2}-\d{2}$/.test(b.data) && isFinite(b.valor) && b.valor).map(b => {
+    const base = b.data + '|' + Math.round(b.valor*100) + '|' + semAcento(b.nome).replace(/\s+/g, ' ').trim();
+    vistos[base] = (vistos[base] || 0) + 1;
+    const k = b.data.slice(0,7), m = mesSeExiste(k), id = 'bx' + hashTxt(base) + (vistos[base] > 1 ? '-' + vistos[base] : '');
+    const dia = +b.data.slice(8), v = Math.abs(b.valor);
+    // já veio antes: virou gasto ou entrada com este id, ou pagou uma conta fixa nesse dia com esse valor
+    const ja = !!(estado.apagados && estado.apagados[id]) || m.gastos.some(g => g.id === id) || m.extras.some(x => x.id === id)
+      || (b.valor < 0 && estado.contas.some(c => m.pagas.includes(c.id) && m.pagoEm[c.id] === dia && Math.abs(valorConta(c, m) - v) < .005));
+    return {...b, id, k, dia, desc:nomeLimpo(b.nome, b.hist), ja, acao:'x', motivo:''};
+  });
+  itens.forEach(it => {
+    const h = semAcento(it.hist + ' ' + it.nome), m = mesSeExiste(it.k), v = Math.abs(it.valor);
+    const pr = (acao, motivo = '') => { it.acao = acao; it.motivo = motivo; };
+    if(it.valor > 0){
+      if(/resgate|rendimento|evento b3|credito liberado|devolvid|estorno/.test(h)) return pr('x', 'não é renda: volta de investimento, crédito ou devolução');
+      return pr('x', 'entrada: escolha “Entrada extra” se for renda');
+    }
+    if(/aplicac|investim|poupanca|porquinho/.test(h)) return pr('x', 'foi para investimento');
+    const conta = estado.contas.find(c => vale(c, it.k) && !m.pagas.includes(c.id) && !usadas.has(it.k + c.id)
+      && (pareceNome(c.nome, it.nome) || Math.abs(valorConta(c, m) - v) < .005));
+    if(conta){ usadas.add(it.k + conta.id); return pr('c:' + conta.id, 'mesmo valor ou nome da conta fixa'); }
+    const div = estado.dividas.find(d => vale(d, it.k) && !usadas.has(it.k + d.id) && (pareceNome(d.nome, it.nome) || Math.abs(d.valor - v) < .005));
+    if(div){
+      usadas.add(it.k + div.id);
+      return m.parcelas[div.id] ? pr('x', `parcela de ${div.nome} já marcada neste mês`) : pr('p:' + div.id, 'mesmo valor ou nome da parcela');
+    }
+    if(/fatura/.test(h)) return pr('g:outros', 'se você lança as compras do cartão uma a uma, mude para Ignorar');
+    pr('g:' + ((REGRAS.find(([, re]) => re.test(h)) || ['outros'])[0]));
+  });
+  // Pix que voltou: a ida e a volta se anulam
+  itens.filter(it => it.valor > 0 && /devolvid|estorno/.test(semAcento(it.hist))).forEach(volta => {
+    const ida = itens.find(o => o.valor === -volta.valor && semAcento(o.nome) === semAcento(volta.nome) && o.acao !== 'x' && o.data <= volta.data);
+    if(ida){ ida.acao = 'x'; ida.motivo = `voltou em ${volta.data.slice(8)}/${volta.data.slice(5,7)} (devolvido)`; }
+  });
+  return itens;
+}
+
+function opcoesExtrato(it){
+  const m = mesSeExiste(it.k), o = [];
+  if(it.valor < 0){
+    CATS.forEach(c => o.push(['g:' + c.id, 'Gasto · ' + c.nome]));
+    estado.contas.filter(c => vale(c, it.k)).forEach(c => o.push(['c:' + c.id, 'Conta paga · ' + c.nome + (m.pagas.includes(c.id) ? ' (já paga)' : '')]));
+    estado.dividas.filter(d => vale(d, it.k)).forEach(d => o.push(['p:' + d.id, 'Parcela · ' + d.nome]));
+  } else o.push(['e', 'Entrada extra do mês']);
+  o.push(['x', 'Ignorar']);
+  return o.map(([v, t]) => `<option value="${esc(v)}" ${v === it.acao ? 'selected' : ''}>${esc(t)}</option>`).join('');
+}
+function contarExtrato(){
+  const n = imp.filter(it => !it.ja && it.acao !== 'x').length;
+  $('exAplicar').textContent = n ? `Lançar ${n}` : 'Nada para lançar';
+  $('exAplicar').disabled = !n;
+}
+function mostrarExtrato(itens){
+  imp = itens;
+  const novos = itens.filter(it => !it.ja), velhos = itens.length - novos.length;
+  const datas = itens.map(it => it.data).sort(), dm = d => d.slice(8) + '/' + d.slice(5,7);
+  $('exResumo').textContent = !itens.length ? 'Não achei lançamentos nesse arquivo. Ele precisa ser o extrato em OFX ou CSV.'
+    : `${itens.length} lançamentos de ${dm(datas[0])} a ${dm(datas[datas.length-1])}`
+      + (velhos ? ` · ${velhos} já ${velhos===1?'importado':'importados'} antes (escondidos)` : '')
+      + '. Confira o que cada um vira; entradas ficam de fora, porque a renda você informa em “Renda e reserva”.';
+  $('exLista').innerHTML = novos.map(it => `<li class="ex ${it.acao==='x'?'ign':''}">
+      <span class="ex-dia num">${it.data.slice(8)}/${it.data.slice(5,7)}</span>
+      <span class="ex-nome" title="${esc(it.nome)}">${esc(it.desc)}<small>${esc(it.hist)}</small></span>
+      <span class="val num ${it.valor>0?'ent':''}">${it.valor>0?'+':''}${brl(it.valor)}</span>
+      <select data-ex="${esc(it.id)}" aria-label="O que fazer com ${esc(it.desc)}">${opcoesExtrato(it)}</select>
+      ${it.motivo ? `<span class="ex-motivo">${esc(it.motivo)}</span>` : ''}
+    </li>`).join('');
+  contarExtrato();
+  $('extrato').showModal();
+}
+function aplicarExtrato(){
+  const usar = imp.filter(it => !it.ja && it.acao !== 'x');
+  if(!usar.length) return;
+  comDesfazer(`Extrato: ${usar.length} ${usar.length===1?'lançamento':'lançamentos'}`, () => usar.forEach((it, i) => {
+    const m = mes(it.k), [tipo, alvo] = it.acao.split(':'), v = Math.abs(it.valor);
+    if(tipo === 'g') m.gastos.push({id:it.id, valor:v, desc:it.desc, cat:alvo, dia:it.dia, ordem:Date.now() + i});
+    else if(tipo === 'e') m.extras.push({id:it.id, nome:it.desc, valor:v});
+    else if(tipo === 'c' && !m.pagas.includes(alvo)){
+      m.pagas.push(alvo); m.pagoEm[alvo] = it.dia;
+      const c = estado.contas.find(c => c.id === alvo);
+      if(c && Math.abs(valorConta(c, m) - v) > .005) m.valores[alvo] = v;   // o valor que saiu de verdade
+    }
+    else if(tipo === 'p'){
+      const d = estado.dividas.find(d => d.id === alvo);
+      if(d && naRef(it.k, () => restantes(d)) > 0) m.parcelas[alvo] = (m.parcelas[alvo] || 0) + 1;
+    }
+  }));
+  $('extrato').close();
+}
+$('abrirExtrato').onclick = () => $('arqExtrato').click();
+$('arqExtrato').onchange = async e => {
+  const f = e.target.files[0]; e.target.value = ''; if(!f) return;
+  try{
+    const txt = lerTexto(await f.arrayBuffer());
+    mostrarExtrato(montarExtrato(/<OFX>/i.test(txt) ? lerOFX(txt) : lerCSV(txt)));
+  }catch(err){ avisar('não consegui ler esse extrato', 4000); }
+};
+$('exLista').onchange = e => {
+  const it = imp && imp.find(x => x.id === e.target.dataset.ex); if(!it) return;
+  it.acao = e.target.value; e.target.closest('li').classList.toggle('ign', it.acao === 'x'); contarExtrato();
+};
+$('exAplicar').onclick = aplicarExtrato;
+$('exCancelar').onclick = $('exFechar').onclick = () => $('extrato').close();
+
 $('arquivo').onchange = e => {
   const f = e.target.files[0]; if(!f) return;
   const r = new FileReader();

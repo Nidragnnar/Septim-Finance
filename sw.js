@@ -1,7 +1,7 @@
 // Cache só do essencial, e só do próprio site (as conversas com o Drive
 // passam direto). Rede primeiro: com sinal você pega sempre a versão nova;
 // sem sinal, o cache abre o painel.
-const VERSAO = 'septim-v8';
+const VERSAO = 'septim-v9';
 const ARQUIVOS = ['./', './index.html', './manifest.webmanifest', './icone-192.png', './icone-512.png', './logo.png', './dragao.png'];
 
 self.addEventListener('install', e => {

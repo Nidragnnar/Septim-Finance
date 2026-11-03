@@ -21,6 +21,7 @@ A pergunta que ele responde no topo não é "quanto tenho na conta", é **quanto
 - **Encerrar sem perder o passado** — o × numa conta que já existia em meses anteriores encerra a conta a partir do mês aberto; os meses anteriores continuam com ela.
 - **Desfazer** — apagou sem querer? Aparece um aviso com **Desfazer** por alguns segundos.
 - **Dívidas e parcelas** — quantas parcelas quiser no mesmo mês, com previsão de quando acaba. Dívida quitada some dos meses seguintes.
+- **Importar extrato do banco** — em *Seus dados*, escolha o extrato em OFX ou CSV (testado com o do Inter). O painel sugere o que cada linha vira: gasto com categoria, conta fixa paga (mesmo valor ou nome), parcela de dívida ou nada (investimento, Pix devolvido, entradas). Você revisa e ajusta antes de lançar; importar o mesmo período de novo não duplica. O arquivo é lido só no aparelho.
 - **Modo escuro**, **instalável no celular** e **funciona sem internet**.
 
 ## Onde os dados ficam
