@@ -1,26 +1,33 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Meu painel de finanças</title>
+<title>Septim</title>
 <meta name="description" content="Painel pessoal para acompanhar gastos, contas fixas, parcelas e reserva do mês.">
-<meta name="theme-color" content="#0F3B44">
+<meta name="theme-color" content="#2A1748">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" href="icone.svg" type="image/svg+xml">
+<link rel="icon" href="icone-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icone-512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&display=swap">
 <style>
+  /* Septim: roxo de dragão com o dourado da moeda */
   :root{
-    --bg:#EAEDF1; --surface:#FFFFFF; --sub:#F7F9FB; --line:#D7DDE5; --line-soft:#EDF0F4;
-    --ink:#17202E; --ink-2:#5A6779; --ink-3:#8E99A8;
-    --petrol:#0F3B44; --petrol-2:#17555F; --petrol-txt:#EAF3F1; --petrol-mut:#9BBDBB;
+    --bg:#F1EEF6; --surface:#FFFFFF; --sub:#F8F6FB; --line:#DDD6E8; --line-soft:#EEEAF4;
+    --ink:#1D1630; --ink-2:#5F5675; --ink-3:#958CA8;
+    --roxo:#2A1748; --roxo-2:#6A3FBF; --roxo-txt:#F3ECFF; --roxo-mut:#B9A6DC; --roxo-link:#5B30AD;
+    --ouro:#E0B44C; --ouro-txt:#8A6516;
     --pos:#2E7D5B; --pos-bg:#E7F3ED; --warn:#B7791F; --warn-bg:#FBF2E1;
-    --dang:#A63D33; --dang-bg:#FBEAE8; --neutro-bg:#EFF2F6;
-    --trilho:#E7EBF0; --barra-dia:#B9C6D2;
+    --dang:#A63D33; --dang-bg:#FBEAE8; --neutro-bg:#F0ECF6;
+    --trilho:#EAE5F2; --barra-dia:#CBBEE2;
   }
   body.escuro{
-    --bg:#12181F; --surface:#1B222B; --sub:#212A34; --line:#2E3945; --line-soft:#262F3A;
-    --ink:#E4EAF1; --ink-2:#9AA7B6; --ink-3:#6E7C8C;
-    --petrol:#0B2E36; --petrol-2:#17555F; --petrol-txt:#DCEBE8; --petrol-mut:#82A8A6;
+    --bg:#100C18; --surface:#1A1426; --sub:#211A30; --line:#30264A; --line-soft:#271F3A;
+    --ink:#ECE6F8; --ink-2:#A89EC0; --ink-3:#766C8E;
+    --roxo:#24123F; --roxo-2:#7C4DDB; --roxo-txt:#EFE6FF; --roxo-mut:#A994D2; --roxo-link:#BFA3F5;
+    --ouro:#E6BE5C; --ouro-txt:#E6BE5C;
     --pos:#5FBF92; --pos-bg:#1B3A2C; --warn:#D9A441; --warn-bg:#3A2E17;
-    --dang:#E28579; --dang-bg:#3B2320; --neutro-bg:#2A333E;
-    --trilho:#2C3742; --barra-dia:#3E4C5A;
+    --dang:#E28579; --dang-bg:#3B2320; --neutro-bg:#2A2238;
+    --trilho:#2C2340; --barra-dia:#4A3D66;
   }
   *{box-sizing:border-box}
   html{color-scheme:light}
@@ -32,13 +39,17 @@
   }
   .wrap{max-width:1080px; margin:0 auto; padding:20px 16px 64px}
   h1{font-size:19px; font-weight:650; letter-spacing:-.01em; margin:0}
+  .marca-septim{display:flex; align-items:center; gap:9px}
+  .marca-septim .logo{width:22px; height:36px; flex:none; background:var(--roxo-2); -webkit-mask:url(logo.png) center/contain no-repeat; mask:url(logo.png) center/contain no-repeat; filter:drop-shadow(0 2px 6px rgba(106,63,191,.35))}
+  body.escuro .marca-septim .logo{background:var(--ouro)}
+  .marca-septim h1{font-family:Cinzel,Georgia,"Times New Roman",serif; font-size:21px; font-weight:700; letter-spacing:.06em}
   h2{font-size:14px; font-weight:650; margin:0; letter-spacing:-.005em}
   .num{font-variant-numeric:tabular-nums}
   button{font:inherit; cursor:pointer}
   input,select{font:inherit; color:var(--ink)}
   input,select{background:var(--surface); border:1px solid var(--line); border-radius:8px; padding:8px 10px; width:100%; min-width:0}
   input::placeholder{color:var(--ink-3)}
-  input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--petrol-2); outline-offset:1px}
+  input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--roxo-2); outline-offset:1px}
   .muted{color:var(--ink-2)} .tiny{font-size:12.5px}
 
   .top{display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:16px}
@@ -53,40 +64,103 @@
   .nuvem.ocupado i{background:var(--warn)}
   .nuvem.off i{background:var(--dang)}
 
-  .hero{background:var(--petrol); color:var(--petrol-txt); border-radius:14px; padding:22px 22px 18px; margin-bottom:14px}
+  .hero{position:relative; overflow:hidden; isolation:isolate; color:var(--roxo-txt); border-radius:16px; padding:22px 22px 18px; margin-bottom:14px;
+    background:radial-gradient(120% 140% at 100% 0%, #4A2788 0%, var(--roxo) 52%, #170B29 100%);
+    border:1px solid rgba(224,180,76,.22); box-shadow:0 10px 30px -14px rgba(42,23,72,.55)}
+  .hero .dragao-fundo{position:absolute; right:12px; top:4%; height:92%; aspect-ratio:804/600; background:var(--ouro); -webkit-mask:url(dragao.png) center/contain no-repeat; mask:url(dragao.png) center/contain no-repeat; opacity:.16; z-index:-1; pointer-events:none}
+  @media (max-width:520px){ .hero .dragao-fundo{height:62%; top:auto; bottom:6px; right:-6px; opacity:.11} }
   .hero-top{display:flex; justify-content:space-between; align-items:flex-end; gap:16px; flex-wrap:wrap}
-  .hero label{display:block; font-size:13px; color:var(--petrol-mut); margin-bottom:2px}
+  .hero label{display:block; font-size:13px; color:var(--roxo-mut); margin-bottom:2px}
   .big{font-size:clamp(34px,7vw,52px); font-weight:680; letter-spacing:-.03em; line-height:1}
-  .big.neg{color:#F0A79E}
+  .big{color:#FFFFFF}
+  .big.neg{color:#F4A3B5}
   .porDia{text-align:right}
   .porDia .v{font-size:20px; font-weight:640; letter-spacing:-.02em}
-  .barra{height:9px; background:rgba(255,255,255,.16); border-radius:99px; margin:18px 0 10px; overflow:hidden; display:flex}
+  .barra{height:9px; background:rgba(255,255,255,.14); border-radius:99px; margin:18px 0 10px; overflow:hidden; display:flex}
   .barra i{display:block; height:100%}
   .legenda{display:flex; gap:16px; flex-wrap:wrap; font-size:12.5px}
-  .legenda span{display:flex; align-items:center; gap:6px; color:var(--petrol-mut)}
+  .legenda span{display:flex; align-items:center; gap:6px; color:var(--roxo-mut)}
   .dot{width:8px; height:8px; border-radius:3px; flex:none}
 
-  .fita{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:14px 16px 10px; margin-bottom:14px}
+  .fita{background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:14px 16px 10px; margin-bottom:14px}
   .fita-head{display:flex; justify-content:space-between; align-items:baseline; gap:10px; margin-bottom:10px}
   .dias{display:flex; gap:2px; align-items:flex-end; height:64px}
   .dia{flex:1; display:flex; flex-direction:column; justify-content:flex-end; height:100%}
   .dia .b{background:var(--barra-dia); border-radius:2px 2px 0 0; min-height:2px}
-  .dia.hoje .b{background:var(--petrol-2)}
+  .dia.hoje .b{background:var(--roxo-2)}
   .marcas{display:flex; gap:2px; margin-top:4px}
   .marca{flex:1; height:12px; display:flex; align-items:center; justify-content:center}
   .marca i{width:6px; height:6px; border-radius:99px; display:block}
   .escala{display:flex; justify-content:space-between; font-size:11px; color:var(--ink-3); margin-top:2px}
 
   .grade{display:grid; grid-template-columns:1.15fr .85fr; gap:14px; align-items:start}
+  .dupla{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px; align-items:stretch}
+  @media (max-width:820px){ .dupla{grid-template-columns:1fr} }
+
+  .hist{display:flex; gap:10px; align-items:stretch; height:170px}
+  .hcol{flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; min-width:0}
+  .hbarra{position:relative; flex:1; width:100%; max-width:46px; display:flex; align-items:flex-end}
+  .hpilha{width:100%; display:flex; flex-direction:column; border-radius:6px 6px 2px 2px; overflow:hidden; min-height:2px; background:var(--trilho)}
+  .hpilha i{display:block; min-height:0}
+  .hcol:not(.atual) .hpilha{opacity:.72}
+  .hrenda{position:absolute; left:-4px; right:-4px; height:0; border-top:2px dashed var(--ouro-txt); z-index:1}
+  .hrot{font-size:11.5px; color:var(--ink-2); text-transform:capitalize}
+  .hcol.atual .hrot{color:var(--ink); font-weight:650}
+  .hval{font-size:11px; color:var(--pos); white-space:nowrap; min-height:15px}
+  .hval.neg{color:var(--dang)}
+  .hcol.atual .hval{color:var(--ink-3)}
+  .hleg{display:flex; gap:12px; flex-wrap:wrap; margin-top:12px}
+  .hleg span{display:flex; align-items:center; gap:6px}
+  .hrenda-leg{display:inline-block; width:14px; border-top:2px dashed var(--ouro-txt)}
+
+  li.prev{display:grid; grid-template-columns:62px 1fr auto; align-items:center; gap:12px; padding:10px 16px; border-bottom:1px solid var(--line-soft)}
+  .prev-mes{font-weight:600; text-transform:capitalize}
+  .prev-mes small{font-weight:400; color:var(--ink-3); font-size:11px}
+  .prev-meio{display:flex; flex-direction:column; gap:4px; min-width:0}
+  .prev-trilho{height:6px; background:var(--trilho); border-radius:99px; overflow:hidden}
+  .prev-trilho i{display:block; height:100%; background:linear-gradient(90deg, var(--roxo-2), #B794F4)}
+  .prev-fim{font-size:11.5px; color:var(--ouro-txt)}
+  .val.neg{color:var(--dang)}
+  .prev-nota{margin:0; padding:10px 16px 14px}
+
+  .resumo{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:14px}
+  @media (max-width:820px){ .resumo{grid-template-columns:1fr 1fr} }
+  .kpi{background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:13px 16px; min-width:0}
+  .kpi label{display:block; font-size:11.5px; font-weight:650; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-2)}
+  .kpi .kv{font-size:clamp(19px,3.2vw,25px); font-weight:680; letter-spacing:-.02em; margin:4px 0 2px; white-space:nowrap}
+  .kpi .kv.neg{color:var(--dang)}
+  .kpi .ks{font-size:12px; color:var(--ink-3); display:flex; gap:6px; align-items:center; flex-wrap:wrap}
+  .kpi .tag{font-size:11px}
+
+  li.ins{display:flex; gap:10px; align-items:flex-start; padding:11px 16px; border-bottom:1px solid var(--line-soft); font-size:13.5px}
+  li.ins:last-child{border-bottom:0}
+  .ins-ic{width:22px; height:22px; border-radius:7px; flex:none; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700}
+  .ins-ic.alerta{color:var(--dang); background:var(--dang-bg)}
+  .ins-ic.atencao{color:var(--warn); background:var(--warn-bg)}
+  .ins-ic.bom{color:var(--pos); background:var(--pos-bg)}
+  .ins-ic.info{color:var(--roxo-link); background:var(--neutro-bg)}
+
+  .saude-topo{display:flex; align-items:center; gap:18px; margin-bottom:12px}
+  .gauge{width:150px; flex:none}
+  .gauge text{font-variant-numeric:tabular-nums}
+  .saude-rot b{display:block; font-size:18px}
+  .saude-linha{display:grid; grid-template-columns:1fr auto; gap:2px 10px; margin-top:9px; font-size:13px}
+  .saude-linha .sb{grid-column:1/-1; height:5px; background:var(--trilho); border-radius:99px; overflow:hidden}
+  .saude-linha .sb i{display:block; height:100%; border-radius:99px}
+
+  .catwrap{display:grid; grid-template-columns:128px 1fr; gap:16px; align-items:center}
+  @media (max-width:380px){ .catwrap{grid-template-columns:1fr} .rosca{max-width:150px; margin:0 auto} }
+  .rosca text{font-variant-numeric:tabular-nums}
+
   @media (max-width:820px){ .grade{grid-template-columns:1fr} }
   .col{display:flex; flex-direction:column; gap:14px}
-  .card{background:var(--surface); border:1px solid var(--line); border-radius:12px; overflow:hidden}
+  .card{background:var(--surface); border:1px solid var(--line); border-radius:14px; overflow:hidden}
   .card > header{display:flex; justify-content:space-between; align-items:center; gap:10px; padding:13px 16px; border-bottom:1px solid var(--line-soft)}
   .card .corpo{padding:14px 16px}
 
   .form-gasto{display:grid; grid-template-columns:110px 1fr; gap:8px; padding:14px 16px; background:var(--sub); border-bottom:1px solid var(--line-soft)}
   .form-gasto .linha2{grid-column:1/-1; display:grid; grid-template-columns:1fr 74px 96px; gap:8px}
-  .add{background:var(--petrol-2); color:#F2F8F7; border:0; border-radius:8px; padding:9px 12px; font-weight:600}
+  .add{background:var(--roxo-2); color:#FFFFFF; border:0; border-radius:8px; padding:9px 12px; font-weight:600}
   .add:hover{filter:brightness(1.12)}
 
   ul{list-style:none; margin:0; padding:0}
@@ -112,7 +186,7 @@
 
   .editavel{width:96px; text-align:right; font-weight:600; padding:5px 6px; background:transparent; border:1px solid transparent; border-radius:7px; font-variant-numeric:tabular-nums}
   .editavel:hover{border-color:var(--line); background:var(--sub)}
-  .editavel:focus{border-color:var(--petrol-2); background:var(--surface)}
+  .editavel:focus{border-color:var(--roxo-2); background:var(--surface)}
   .conta-linha{display:flex; align-items:center; gap:10px; padding:9px 16px; border-bottom:1px solid var(--line-soft)}
   .conta-linha:last-of-type{border-bottom:0}
   .sub-nome{font-size:11.5px; color:var(--ink-3)}
@@ -122,7 +196,7 @@
   .l1{display:flex; align-items:center; gap:10px}
   .prog{height:6px; background:var(--trilho); border-radius:99px; margin:9px 0 8px; overflow:hidden; display:flex}
   .prog i{display:block; height:100%}
-  .prog .antes{background:var(--petrol-2)}
+  .prog .antes{background:var(--roxo-2)}
   .prog .agora{background:var(--pos)}
   .stepper{display:flex; align-items:center; border:1px solid var(--line); border-radius:8px; overflow:hidden; background:var(--surface)}
   .stepper button{border:0; background:transparent; color:var(--ink-2); width:30px; height:28px; font-weight:700; font-size:15px; padding:0}
@@ -144,8 +218,7 @@
     .form-gasto{grid-template-columns:1fr 1fr}
     .form-gasto .linha2{grid-template-columns:1fr 1fr}
   }
-  .abrir{background:transparent; border:0; color:var(--petrol-2); font-weight:600; font-size:13px; padding:0; text-align:left}
-  body.escuro .abrir{color:#7FD8BC}
+  .abrir{background:transparent; border:0; color:var(--roxo-link); font-weight:600; font-size:13px; padding:0; text-align:left}
   .abrir:hover{text-decoration:underline}
   .linha-botoes{display:flex; gap:8px; flex-wrap:wrap}
   .n-status{margin:0; padding:9px 11px; border-radius:8px; font-size:13px; line-height:1.4; background:var(--neutro-bg); color:var(--ink-2)}
@@ -162,15 +235,18 @@
   .aviso{position:fixed; left:16px; right:16px; bottom:20px; margin:0 auto; width:fit-content; z-index:10; display:flex; align-items:center; gap:14px;
     padding:10px 12px 10px 16px; border-radius:10px; background:var(--ink); color:var(--surface);
     font-size:13.5px; box-shadow:0 6px 24px rgba(0,0,0,.25)}
-  .aviso button{background:transparent; border:0; color:#7FD8BC; font-weight:650; padding:2px 4px; white-space:nowrap}
-  body.escuro .aviso button{color:var(--petrol-2)}
+  .aviso button{background:transparent; border:0; color:#C9B0FF; font-weight:650; padding:2px 4px; white-space:nowrap}
+  body.escuro .aviso button{color:var(--roxo-2)}
   [hidden]{display:none !important}
   @media (prefers-reduced-motion:reduce){ *{transition:none !important} }
 </style>
 
 <div class="wrap">
   <div class="top">
-    <h1>Meu painel</h1>
+    <div class="marca-septim">
+      <i class="logo" aria-hidden="true"></i>
+      <h1>Septim</h1>
+    </div>
     <button class="nuvem" id="nuvem" hidden title="Sincronizar agora"><i></i><span id="nuvemTxt">Drive</span></button>
     <span class="estado" id="estado"></span>
     <div class="mes">
@@ -183,6 +259,7 @@
   </div>
 
   <section class="hero">
+    <i class="dragao-fundo" aria-hidden="true"></i>
     <div class="hero-top">
       <div>
         <label id="heroLabel">Livre para gastar até o fim do mês</label>
@@ -197,6 +274,8 @@
     <div class="legenda" id="legenda"></div>
   </section>
 
+  <div class="resumo" id="resumo"></div>
+
   <section class="fita">
     <div class="fita-head">
       <h2>Fita do mês</h2>
@@ -206,6 +285,37 @@
     <div class="marcas" id="marcas"></div>
     <div class="escala"><span>dia 1</span><span id="ultimoDia">dia 30</span></div>
   </section>
+
+  <div class="dupla">
+    <div class="card">
+      <header><h2>Últimos meses</h2><span class="tiny muted">o que saiu · sobra</span></header>
+      <div class="corpo">
+        <div class="hist" id="hist"></div>
+        <div class="hleg tiny muted">
+          <span><i class="dot" style="background:#9B7BDA"></i>Contas fixas</span>
+          <span><i class="dot" style="background:#C9B4F0"></i>Parcelas</span>
+          <span><i class="dot" style="background:#E0B44C"></i>Dia a dia</span>
+          <span><i class="hrenda-leg"></i>Renda</span>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <header><h2>Próximos meses</h2><span class="tiny muted">livre previsto</span></header>
+      <ul id="previsao"></ul>
+      <p class="tiny muted prev-nota" id="prevNota"></p>
+    </div>
+  </div>
+
+  <div class="dupla">
+    <div class="card">
+      <header><h2>Avisos do mês</h2><span class="tiny muted">o que merece atenção</span></header>
+      <ul id="insights"></ul>
+    </div>
+    <div class="card">
+      <header><h2>Saúde financeira</h2><span class="tiny muted">nota de 0 a 100</span></header>
+      <div class="corpo" id="saude"></div>
+    </div>
+  </div>
 
   <div class="grade">
     <div class="col">
@@ -328,13 +438,13 @@
 
 <script>
 const CATS = [
-  {id:'mercado',   nome:'Mercado',     cor:'#3C7A6B'},
-  {id:'comidafora',nome:'Comida fora', cor:'#C08A3E'},
-  {id:'transporte',nome:'Transporte',  cor:'#4A6FA5'},
-  {id:'casa',      nome:'Casa',        cor:'#8A6D9C'},
-  {id:'saude',     nome:'Saúde',       cor:'#C06B6B'},
-  {id:'lazer',     nome:'Lazer',       cor:'#5F8FA8'},
-  {id:'outros',    nome:'Outros',      cor:'#7C8794'},
+  {id:'mercado',   nome:'Mercado',     cor:'#3E8E74'},
+  {id:'comidafora',nome:'Comida fora', cor:'#D29A3A'},
+  {id:'transporte',nome:'Transporte',  cor:'#4F74C8'},
+  {id:'casa',      nome:'Casa',        cor:'#8E5CD9'},
+  {id:'saude',     nome:'Saúde',       cor:'#CC5F7A'},
+  {id:'lazer',     nome:'Lazer',       cor:'#3FA3B8'},
+  {id:'outros',    nome:'Outros',      cor:'#7E7792'},
 ];
 const catDe = g => CATS.some(c => c.id === g.cat) ? g.cat : 'outros';   // categoria desconhecida conta como Outros
 const CHAVE = 'painel-financas-v1';
@@ -713,7 +823,8 @@ $('btnTema').onclick = () => {
 
 /* ================= cálculos ================= */
 const valorConta = (c, m) => (m.valores && m.valores[c.id] != null) ? m.valores[c.id] : c.valor;
-function contasDoMes(){ const m = mes(); return contasAtivas().reduce((s,c)=>s+valorConta(c,m),0); }
+const mesLido = () => mesSeExiste(chaveMes(ref));
+function contasDoMes(){ const m = mesLido(); return contasAtivas().reduce((s,c)=>s+valorConta(c,m),0); }
 function pagasAntes(d){
   return Object.values(estado.meses).reduce((s,mm)=>{
     const p = mm.parcelas;
@@ -723,7 +834,7 @@ function pagasAntes(d){
 }
 function restantes(d){ return Math.max(0, d.total - d.pagas - pagasAntes(d)); }
 function pagasTotal(d){ return d.total - restantes(d); }
-function qtdNoMes(d){ return mes().parcelas[d.id] || 0; }
+function qtdNoMes(d){ return mesLido().parcelas[d.id] || 0; }
 // último mês em que alguma parcela desta dívida foi marcada
 function ultimoMesPago(d){
   return Object.keys(estado.meses).filter(k => (estado.meses[k].parcelas||{})[d.id] > 0).sort().pop() || '';
@@ -740,8 +851,15 @@ function parcelasDoMes(){
     return s + (restantes(d) > 0 ? d.valor : 0);
   }, 0);
 }
-function rendaDoMes(){ return estado.renda + mes().extras.reduce((s,e)=>s+e.valor,0); }
-function gastosDoMes(){ return mes().gastos.reduce((s,g)=>s+g.valor,0); }
+function rendaDoMes(){ return estado.renda + mesLido().extras.reduce((s,e)=>s+e.valor,0); }
+function gastosDoMes(){ return mesLido().gastos.reduce((s,g)=>s+g.valor,0); }
+// faz as contas como se o mês k estivesse aberto
+function naRef(k, fn){
+  const antes = ref; ref = new Date(+k.slice(0,4), +k.slice(5,7)-1, 1);
+  try{ return fn(); } finally { ref = antes; }
+}
+const somaMeses = (k, n) => { const [a, m] = k.split('-').map(Number); return chaveMes(new Date(a, m-1+n, 1)); };
+const rotuloCurto = k => new Date(+k.slice(0,4), +k.slice(5,7)-1, 1).toLocaleDateString('pt-BR',{month:'short'}).replace('.','');
 function diasQueFaltam(){
   if(passou()) return 0;
   if(!ehMesAtual()) return diasNoMes(ref);
@@ -784,15 +902,204 @@ function heroi(){
 
   const base = Math.max(renda, fixas+parc+guardar+gastos, 1);
   const pedacos = [
-    {v:fixas,   cor:'#5C8F97', nome:'Contas fixas'},
-    {v:parc,    cor:'#8FAFA9', nome:'Parcelas'},
-    {v:gastos,  cor:'#D9B26A', nome:'Dia a dia'},
-    {v:guardar, cor:'#7FD8BC', nome:'Guardar'},
+    {v:fixas,   cor:'#9B7BDA', nome:'Contas fixas'},
+    {v:parc,    cor:'#C9B4F0', nome:'Parcelas'},
+    {v:gastos,  cor:'#E0B44C', nome:'Dia a dia'},
+    {v:guardar, cor:'#6FD3B0', nome:'Guardar'},
   ].filter(p=>p.v>0);
   $('barra').innerHTML = pedacos.map(p=>`<i style="width:${(p.v/base*100).toFixed(2)}%;background:${p.cor}"></i>`).join('');
   $('legenda').innerHTML = pedacos.map(p=>`<span><i class="dot" style="background:${p.cor}"></i>${p.nome} ${brl(p.v)}</span>`).join('')
     + (renda ? `<span>Renda ${brl(renda)}</span>` : '');
+  historico(); previsao(); resumo(); avisos(); saude();
 }
+
+/* ----- cartões do topo: renda, saídas, sobra e quanto as parcelas pesam ----- */
+const pctTxt = v => Math.round(v*100) + '%';
+function resumo(){
+  const k = chaveMes(ref), m = mesLido();
+  const renda = rendaDoMes(), fixas = contasDoMes(), parc = parcelasDoMes(), gastos = gastosDoMes();
+  const saidas = fixas + parc + gastos, sobra = renda - saidas;
+  const ant = naRef(mesAnterior(k), () => ({tem:!!estado.meses[mesAnterior(k)], sobra: rendaDoMes() - contasDoMes() - parcelasDoMes() - gastosDoMes()}));
+  const pParc = renda ? parc/renda : 0;
+  const faixa = !parc ? ['pago','sem parcelas'] : pParc <= .3 ? ['pago','saudável (até 30%)'] : pParc <= .4 ? ['vence','acima de 30%'] : ['atras','pesado (mais de 40%)'];
+  const extras = m.extras.length;
+  $('resumo').innerHTML = `
+    <div class="kpi"><label>Renda do mês</label><div class="kv num">${brl(renda)}</div>
+      <div class="ks">${!renda ? 'informe em “Renda e reserva”' : extras ? `inclui ${extras} ${extras===1?'extra':'extras'}` : 'salário'}</div></div>
+    <div class="kpi"><label>Saídas do mês</label><div class="kv num">${brl(saidas)}</div>
+      <div class="ks">${brl(gastos)} no dia a dia · ${m.gastos.length} ${m.gastos.length===1?'lançamento':'lançamentos'}</div></div>
+    <div class="kpi"><label>Sobra do mês</label><div class="kv num ${sobra<0?'neg':''}">${brl(sobra)}</div>
+      <div class="ks">${ant.tem ? variacao(sobra, ant.sobra, true) + ' vs mês passado' : estado.guardar ? `antes de guardar ${brl(estado.guardar)}` : 'renda menos saídas'}</div></div>
+    <div class="kpi"><label>Parcelas da renda</label><div class="kv num">${renda ? pctTxt(pParc) : '—'}</div>
+      <div class="ks"><span class="tag ${faixa[0]}">${faixa[1]}</span></div></div>`;
+}
+
+// dia a dia esperado para o mês inteiro: o que já saiu ou a média, o que for maior
+function gastoPrevisto(){
+  const gastos = gastosDoMes(), {media} = mediaDiaADia();
+  if(passou()) return gastos;
+  if(ehMesAtual()){
+    const d = hojeReal.getDate(), ritmo = d >= 5 ? gastos/d*diasNoMes(ref) : 0;
+    return Math.max(gastos, media || ritmo);
+  }
+  return Math.max(gastos, media);
+}
+
+/* ----- avisos: frases curtas tiradas dos próprios números ----- */
+function avisos(){
+  const k = chaveMes(ref), m = mesLido(), lista = [];
+  const add = (tipo, txt) => lista.push({tipo, txt});
+  const renda = rendaDoMes(), fixas = contasDoMes(), parc = parcelasDoMes(), gastos = gastosDoMes();
+  // contas atrasadas e vencendo
+  if(ehMesAtual()){
+    const hoje = hojeReal.getDate();
+    contasAtivas().filter(c => !m.pagas.includes(c.id)).sort((a,b)=>diaDaConta(a)-diaDaConta(b)).forEach(c => {
+      const d = diaDaConta(c);
+      if(d < hoje) add('alerta', `<b>${esc(c.nome)}</b> está atrasada: venceu dia ${d} (${brl(valorConta(c, m))}).`);
+      else if(d - hoje <= 3) add('atencao', `<b>${esc(c.nome)}</b> vence ${d===hoje ? 'hoje' : d-hoje===1 ? 'amanhã' : 'em '+(d-hoje)+' dias'} (${brl(valorConta(c, m))}).`);
+    });
+    // ritmo do dia a dia contra o que cabe no mês
+    const cabe = renda - fixas - parc - estado.guardar;
+    if(renda && hoje >= 5 && gastos){
+      const fecha = gastos/hoje*diasNoMes(ref);
+      if(fecha > cabe) add('alerta', `No ritmo de ${brl(gastos/hoje)} por dia, o dia a dia fecha o mês em ${brl(fecha)}: ${brl(fecha-cabe)} acima do que cabe.`);
+      else add('bom', `No ritmo de ${brl(gastos/hoje)} por dia, o mês fecha com uns ${brl(cabe-fecha)} livres.`);
+    }
+  }
+  // categorias: a que mais subiu e a que mais pesa
+  if(gastos){
+    const ant = mesSeExiste(mesAnterior(k)), ateDia = ehMesAtual() ? hojeReal.getDate() : 31;
+    const soma = (gs, id) => gs.filter(g => catDe(g)===id && g.dia <= ateDia).reduce((s,g)=>s+g.valor,0);
+    const cats = CATS.map(c => ({...c, v: m.gastos.filter(g=>catDe(g)===c.id).reduce((s,g)=>s+g.valor,0), a: soma(ant.gastos, c.id)}));
+    const sobe = cats.filter(c => c.a > 0 && c.v - c.a >= 50).sort((x,y) => (y.v-y.a)-(x.v-x.a))[0];
+    if(sobe) add('atencao', `<b>${sobe.nome}</b>: ${brl(sobe.v-sobe.a)} a mais que no mesmo ponto do mês passado (+${Math.round((sobe.v/sobe.a-1)*100)}%).`);
+    const maior = [...cats].sort((x,y)=>y.v-x.v)[0];
+    if(maior.v/gastos >= .3) add('info', `<b>${maior.nome}</b> leva ${pctTxt(maior.v/gastos)} do dia a dia (${brl(maior.v)}).`);
+  }
+  // parcelas: peso na renda e as que estão acabando
+  if(renda && parc/renda > .3) add('alerta', `As parcelas comem ${pctTxt(parc/renda)} da renda. O recomendado é ficar até 30%.`);
+  dividasAtivas().forEach(d => {
+    const r = restantes(d); if(!r) return;
+    const depois = r - (qtdNoMes(d) === 0 ? 1 : 0);
+    if(depois <= 2) add('bom', depois === 0
+      ? `A última parcela de <b>${esc(d.nome)}</b> é este mês. Depois sobram ${brl(d.valor)} a mais por mês.`
+      : `<b>${esc(d.nome)}</b> acaba em ${rotuloCurto(somaMeses(k, depois))}. Depois sobram ${brl(d.valor)} a mais por mês.`);
+  });
+  const ic = {alerta:'!', atencao:'!', bom:'✓', info:'i'};
+  $('insights').innerHTML = lista.length
+    ? lista.slice(0, 6).map(i => `<li class="ins"><span class="ins-ic ${i.tipo}">${ic[i.tipo]}</span><span>${i.txt}</span></li>`).join('')
+    : '<li class="vazio">Nada fora do normal. Conforme você lança gastos e contas, os avisos aparecem aqui.</li>';
+}
+
+/* ----- saúde financeira: nota de 0 a 100 em quatro partes -----
+   sobra (40): sobrar 20% da renda ou mais · parcelas (25): até 10% da renda vale tudo, 35% ou mais vale zero
+   fixo (20): contas + parcelas até 50% da renda, zero a partir de 80% · reserva (15): guardar 10% da renda */
+function notaSaude(){
+  const renda = rendaDoMes(); if(!renda) return null;
+  const fixas = contasDoMes(), parc = parcelasDoMes(), prev = gastoPrevisto();
+  const entre = (v, ruim, bom) => Math.max(0, Math.min(1, (v - ruim) / (bom - ruim)));
+  const taxa = (renda - fixas - parc - prev) / renda, pParc = parc/renda, pFixo = (fixas+parc)/renda, pRes = estado.guardar/renda;
+  const partes = [
+    {nome:'Sobra prevista', txt: pctTxt(taxa) + ' da renda', max:40, pts: 40*entre(taxa, 0, .2)},
+    {nome:'Parcelas', txt: pctTxt(pParc) + ' da renda', max:25, pts: 25*entre(pParc, .35, .1)},
+    {nome:'Contas + parcelas', txt: pctTxt(pFixo) + ' da renda', max:20, pts: 20*entre(pFixo, .8, .5)},
+    {nome:'Reserva', txt: estado.guardar ? pctTxt(pRes) + ' da renda' : 'nada separado', max:15, pts: 15*entre(pRes, 0, .1)},
+  ];
+  return {nota: Math.round(partes.reduce((s,p)=>s+p.pts, 0)), partes};
+}
+function saude(){
+  const r = notaSaude();
+  if(!r){ $('saude').innerHTML = '<p class="muted tiny" style="margin:0">Informe a renda em “Renda e reserva” para calcular a nota.</p>'; return; }
+  const [rot, cor] = r.nota >= 80 ? ['Ótima','var(--pos)'] : r.nota >= 60 ? ['Boa','var(--pos)'] : r.nota >= 40 ? ['Atenção','var(--warn)'] : ['Crítica','var(--dang)'];
+  const arco = Math.PI * 50, cheio = arco * r.nota / 100;
+  $('saude').innerHTML = `
+    <div class="saude-topo">
+      <svg class="gauge" viewBox="0 0 120 70" role="img" aria-label="Nota ${r.nota} de 100">
+        <path d="M10 62 A50 50 0 0 1 110 62" fill="none" stroke="var(--trilho)" stroke-width="11" stroke-linecap="round"/>
+        <path d="M10 62 A50 50 0 0 1 110 62" fill="none" stroke="${cor}" stroke-width="11" stroke-linecap="round" stroke-dasharray="${cheio.toFixed(1)} ${arco.toFixed(1)}"/>
+        <text x="60" y="58" text-anchor="middle" font-size="26" font-weight="700" fill="var(--ink)">${r.nota}</text>
+      </svg>
+      <div class="saude-rot"><b style="color:${cor}">${rot}</b><span class="tiny muted">${ehMesAtual() ? 'com o dia a dia previsto até o fim do mês' : passou() ? 'como o mês fechou' : 'com a média do dia a dia'}</span></div>
+    </div>
+    ${r.partes.map(p => `<div class="saude-linha"><span>${p.nome} <span class="muted tiny">· ${p.txt}</span></span><span class="num tiny muted">${Math.round(p.pts)}/${p.max}</span>
+      <div class="sb"><i style="width:${(p.pts/p.max*100).toFixed(0)}%;background:${p.pts/p.max >= .66 ? 'var(--pos)' : p.pts/p.max >= .33 ? 'var(--warn)' : 'var(--dang)'}"></i></div></div>`).join('')}`;
+}
+
+/* ----- últimos 6 meses: o que saiu (contas, parcelas, dia a dia) contra a renda ----- */
+const CORES_MES = {fixas:'#9B7BDA', parc:'#C9B4F0', gastos:'#E0B44C'};
+function historico(){
+  const fim = chaveMes(ref);
+  const meses = Array.from({length:6}, (_,i) => somaMeses(fim, i-5)).map(k => naRef(k, () => ({
+    k, fixas:contasDoMes(), parc:parcelasDoMes(), gastos:gastosDoMes(), renda:rendaDoMes(), tem:!!estado.meses[k]
+  })));
+  const pico = Math.max(1, ...meses.map(m => Math.max(m.renda, m.fixas+m.parc+m.gastos)));
+  const alt = v => (v/pico*100).toFixed(1) + '%';
+  $('hist').innerHTML = meses.map(m => {
+    const total = m.fixas + m.parc + m.gastos, sobra = m.renda - total;
+    const dica = `${rotuloCurto(m.k)}: saiu ${brl(total)}${m.renda ? (sobra >= 0 ? ' · sobrou ' : ' · faltou ') + brl(Math.abs(sobra)) : ''}`;
+    // mês em curso ainda não fechou: sem sobra
+    const rotSobra = m.k >= chaveMes(hojeReal) ? (m.k === chaveMes(hojeReal) ? 'em curso' : '') : m.renda && m.tem ? (sobra >= 0 ? '+' : '−') + brl(Math.abs(sobra)).replace(/^R\$\s/, '') : '';
+    return `<div class="hcol ${m.k===fim?'atual':''}" title="${dica}">
+      <div class="hbarra">
+        ${m.renda ? `<i class="hrenda" style="bottom:${alt(m.renda)}"></i>` : ''}
+        <div class="hpilha" style="height:${alt(total)}">
+          <i style="flex:${m.gastos};background:${CORES_MES.gastos}"></i>
+          <i style="flex:${m.parc};background:${CORES_MES.parc}"></i>
+          <i style="flex:${m.fixas};background:${CORES_MES.fixas}"></i>
+        </div>
+      </div>
+      <span class="hrot">${rotuloCurto(m.k)}</span>
+      <span class="hval num ${sobra < 0 ? 'neg' : ''}">${rotSobra}</span>
+    </div>`;
+  }).join('');
+}
+
+/* ----- próximos 6 meses: renda menos o comprometido e a média do dia a dia ----- */
+// média do dia a dia nos últimos 3 meses fechados que têm lançamento
+function mediaDiaADia(){
+  const fechados = Object.keys(estado.meses).filter(k => k < chaveMes(hojeReal) && estado.meses[k].gastos.length).sort().slice(-3);
+  const media = fechados.length ? fechados.reduce((s,k) => s + estado.meses[k].gastos.reduce((a,g)=>a+g.valor,0), 0) / fechados.length : 0;
+  return {media, fechados};
+}
+function previsao(){
+  const base = chaveMes(ref);
+  const {media, fechados} = mediaDiaADia();
+  // parcelas: cada mês sem marcação conta uma, até acabar (o mês aberto já conta uma, se não tiver marcação)
+  const sobra = {};
+  estado.dividas.forEach(d => { const r = restantes(d); sobra[d.id] = Math.max(0, r - (qtdNoMes(d) === 0 && r > 0 && vale(d) ? 1 : 0)); });
+  const linhas = Array.from({length:6}, (_,i) => somaMeses(base, i+1)).map(k => {
+    const m = mesSeExiste(k);
+    let parc = 0; const acabam = [];
+    estado.dividas.forEach(d => {
+      if(!vale(d, k)) return;
+      const q = m.parcelas[d.id] || 0;
+      if(q){ parc += q*d.valor; return; }
+      if(sobra[d.id] > 0){ parc += d.valor; if(--sobra[d.id] === 0) acabam.push(d.nome); }
+    });
+    const fixas = naRef(k, contasDoMes), renda = naRef(k, rendaDoMes);
+    const comprometido = fixas + parc + estado.guardar;
+    return {k, renda, comprometido, livre: renda - comprometido - media, acabam};
+  });
+  if(!estado.renda && !linhas.some(l => l.comprometido)){
+    $('previsao').innerHTML = '<li class="vazio">Informe a renda e as contas fixas: aqui aparece quanto deve sobrar nos próximos meses.</li>';
+    $('prevNota').textContent = ''; return;
+  }
+  $('previsao').innerHTML = linhas.map(l => {
+    const pct = l.renda ? Math.min(100, (l.comprometido + media) / l.renda * 100) : 100;
+    return `<li class="prev">
+      <span class="prev-mes">${rotuloCurto(l.k)} <small>${l.k.slice(0,4)}</small></span>
+      <div class="prev-meio">
+        <div class="prev-trilho"><i style="width:${pct.toFixed(1)}%"></i></div>
+        ${l.acabam.length ? `<span class="prev-fim">última parcela: ${esc(l.acabam.join(', '))}</span>` : ''}
+      </div>
+      <span class="val num ${l.livre < 0 ? 'neg' : ''}">${brl(l.livre)}</span>
+    </li>`;
+  }).join('');
+  $('prevNota').textContent = media
+    ? `Livre previsto = renda − contas fixas − parcelas − guardar − média do dia a dia (${brl(media)}, dos últimos ${fechados.length} ${fechados.length===1?'mês':'meses'}).`
+    : 'Livre previsto = renda − contas fixas − parcelas − guardar. Quando houver meses fechados com gastos, a média do dia a dia entra na conta.';
+}
+
 
 function fita(){
   const n = diasNoMes(ref), m = mes();
@@ -849,10 +1156,11 @@ function listarGastos(){
 }
 
 // diferença contra o mês passado; no mês corrente, compara até o mesmo dia para não comparar meio mês com um mês inteiro
-function variacao(agora, antes){
+// bomSubir: para a sobra, subir é bom (verde); para gastos, subir é ruim
+function variacao(agora, antes, bomSubir){
   const d = agora - antes;
   if(Math.abs(d) < 0.005) return '<span class="var">igual</span>';
-  return `<span class="var ${d>0?'sobe':'desce'}">${d>0?'▲':'▼'} ${brl(Math.abs(d))}</span>`;
+  return `<span class="var ${(d>0) !== !!bomSubir ? 'sobe' : 'desce'}">${d>0?'▲':'▼'} ${brl(Math.abs(d))}</span>`;
 }
 function categorias(){
   const m = mes(), total = gastosDoMes();
@@ -865,12 +1173,23 @@ function categorias(){
   const soma = (gs, c) => gs.filter(g=>catDe(g)===c.id).reduce((s,g)=>s+g.valor,0);
   const somas = CATS.map(c=>({...c, v:soma(m.gastos, c), a:soma(gastosAnt, c)}))
                     .filter(c=>c.v>0).sort((a,b)=>b.v-a.v);
-  $('categorias').innerHTML = somas.map(c=>`
+  // rosca: cada categoria é um trecho do círculo, na ordem do ranking
+  const volta = 2*Math.PI*46; let ja = 0;
+  const fatias = somas.map(c => { const t = c.v/total*volta, s = `<circle cx="60" cy="60" r="46" fill="none" stroke="${c.cor}" stroke-width="16"
+    stroke-dasharray="${Math.max(0, t-1.2).toFixed(2)} ${volta.toFixed(2)}" stroke-dashoffset="${(-ja).toFixed(2)}"><title>${c.nome}: ${brl(c.v)}</title></circle>`; ja += t; return s; }).join('');
+  $('categorias').innerHTML = `<div class="catwrap">
+    <svg class="rosca" viewBox="0 0 120 120" role="img" aria-label="Gastos por categoria">
+      <g transform="rotate(-90 60 60)"><circle cx="60" cy="60" r="46" fill="none" stroke="var(--trilho)" stroke-width="16"/>${fatias}</g>
+      <text x="60" y="57" text-anchor="middle" font-size="9.5" fill="var(--ink-2)">dia a dia</text>
+      <text x="60" y="71" text-anchor="middle" font-size="12.5" font-weight="700" fill="var(--ink)">${brl(total).replace(/,\d\d$/, '')}</text>
+    </svg>
+    <div>${somas.map(c=>`
     <div class="catlinha">
       <span>${c.nome}</span>
       <span class="num muted tiny">${brl(c.v)} · ${Math.round(c.v/total*100)}%${totalAnt ? ' · '+variacao(c.v, c.a) : ''}</span>
       <div class="catbar"><i style="width:${(c.v/somas[0].v*100).toFixed(1)}%;background:${c.cor}"></i></div>
-    </div>`).join('');
+    </div>`).join('')}</div>
+  </div>`;
 }
 
 function listarContas(){

@@ -1,4 +1,6 @@
-# Painel de finanças
+# Septim
+
+Painel de finanças com cara de moeda de dragão: roxo, dourado e um dragão de guarda.
 
 Painel pessoal para acompanhar o mês: quanto ainda dá para gastar, contas fixas com vencimento, parcelas e reserva. Um arquivo HTML, sem build e sem servidor — e, se você quiser, sincronizado entre computador e celular pelo seu próprio Google Drive.
 
@@ -7,8 +9,13 @@ A pergunta que ele responde no topo não é "quanto tenho na conta", é **quanto
 ## O que tem dentro
 
 - **Livre para gastar** — renda menos contas fixas, parcelas, o que você quer guardar e o que já gastou. Ao lado, o mesmo número dividido pelos dias que faltam.
+- **Resumo em cartões** — renda, saídas, sobra (com a diferença para o mês passado) e quanto da renda vai para parcelas, com a faixa saudável de até 30%.
+- **Últimos meses** — gráfico dos seis meses até o mês aberto: contas fixas, parcelas e dia a dia empilhados, a renda tracejada e quanto sobrou em cada mês fechado.
+- **Próximos meses** — quanto deve ficar livre nos seis meses seguintes: renda menos contas fixas, parcelas, o que você quer guardar e a média do dia a dia dos últimos três meses. Avisa em que mês cai a última parcela de cada dívida.
+- **Avisos do mês** — frases tiradas dos seus números: conta atrasada ou vencendo, ritmo do dia a dia contra o que cabe no mês, categoria que disparou, parcelas pesadas e dívidas que estão acabando.
+- **Saúde financeira** — nota de 0 a 100: sobra prevista (40 pontos, cheia com 20% da renda), parcelas (25, cheia até 10%), contas + parcelas (20, cheia até 50%) e reserva (15, cheia guardando 10%).
 - **Fita do mês** — uma barra por dia com o gasto daquele dia; embaixo, um ponto em cada vencimento (verde pago, âmbar chegando, vermelho passou).
-- **Gastos do dia a dia** — valor, descrição, Enter. Agrupados por dia, somados por categoria. Toque no nome de um gasto para corrigir.
+- **Gastos do dia a dia** — valor, descrição, Enter. Agrupados por dia, somados por categoria, com gráfico de rosca. Toque no nome de um gasto para corrigir.
 - **Comparação com o mês passado** — por categoria e no total. No mês corrente, compara até o mesmo dia, para não pôr meio mês contra um mês inteiro.
 - **Contas fixas** — cadastradas uma vez, reaparecem todo mês a partir do mês em que entraram. Valor editável mês a mês, com o valor normal ao lado. Marcar como paga registra o dia sozinho. Toque no nome para mudar nome, valor normal ou dia (o valor novo vale daqui para a frente). Vencimento no dia 31 cai no último dia dos meses curtos.
 - **Encerrar sem perder o passado** — o × numa conta que já existia em meses anteriores encerra a conta a partir do mês aberto; os meses anteriores continuam com ela.
@@ -105,7 +112,8 @@ index.html              o painel inteiro: markup, estilo e lógica
 apps-script/Codigo.gs   o script que guarda os dados no seu Drive
 manifest.webmanifest    nome, cores e ícone para instalar no celular
 sw.js                   cache offline, rede primeiro
-icone.svg               ícone do app
+icone-192.png, -512    ícone do app
+logo.png, dragao.png   logo do topo e dragão do painel (máscaras)
 ```
 
 ## Licença
