@@ -410,3 +410,8 @@ body{background:radial-gradient(1100px 620px at 88% -12%, var(--brilho-roxo), tr
 .card,.kpi:not(.destaque),.pilulas,.alertas .aviso-item{background:color-mix(in srgb, var(--surface) 82%, transparent); backdrop-filter:blur(3px); -webkit-backdrop-filter:blur(3px)}
 .principal::before{opacity:.1}
 :root[data-tema="escuro"] .principal::before{opacity:.09}
+
+/* telas largas: o conteúdo usa a largura (até 1680 px), centralizado, com o topo alinhado */
+main{max-width:1680px; margin-inline:auto}
+.topo > *{min-width:0}
+@media (min-width:901px){ .topo{padding-inline:max(28px, calc((100% - 1680px) / 2 + 28px))} }

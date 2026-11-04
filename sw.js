@@ -1,5 +1,5 @@
 // Cache para abrir sem internet. Rede primeiro: com sinal você pega sempre a versão nova.
-const VERSAO = 'septim-v12';
+const VERSAO = 'septim-v13';
 const ARQUIVOS = ['./', './index.html', './manifest.webmanifest', './css/app.css', './js/app.js', './js/dados.js', './js/calc.js', './js/ui.js', './js/formularios.js', './js/migracao.js', './js/nuvem.js', './js/extrato.js',
   './js/telas/dashboard.js', './js/telas/lancamentos.js', './js/telas/contas.js', './js/telas/cartoes.js', './js/telas/planejamento.js', './js/telas/metas.js',
   './js/telas/investimentos.js', './js/telas/dividas.js', './js/telas/calendario.js', './js/telas/relatorios.js', './js/telas/config.js',
