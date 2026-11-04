@@ -115,7 +115,7 @@ main{padding:6px 28px 90px; max-width:1320px; width:100%; outline:none; animatio
 .kpi.destaque{background:radial-gradient(130% 160% at 100% 0%, #4A2788 0%, var(--roxo) 55%, #170B29 100%); border-color:rgba(224,180,76,.25); color:var(--roxo-txt)}
 .kpi.destaque .kpi-cab,.kpi.destaque .kpi-s{color:var(--roxo-mut)}
 .kpi.destaque .kpi-ic{background:rgba(224,180,76,.16); color:var(--ouro)}
-.kpi.destaque::after{content:""; position:absolute; right:-10px; bottom:-8px; width:120px; height:90px; background:var(--ouro); opacity:.13; -webkit-mask:url(../img/dragao.png) center/contain no-repeat; mask:url(../img/dragao.png) center/contain no-repeat; pointer-events:none}
+.kpi.destaque::after{content:""; position:absolute; right:-6px; top:50%; transform:translateY(-50%); width:120px; height:90px; background:var(--ouro); opacity:.13; -webkit-mask:url(../img/dragao.png) center/contain no-repeat; mask:url(../img/dragao.png) center/contain no-repeat; pointer-events:none}
 .pos-bg{--c:var(--pos); --c-bg:var(--pos-bg)} .neg-bg{--c:var(--neg); --c-bg:var(--neg-bg)} .ouro-bg{--c:var(--ouro-txt); --c-bg:var(--ouro-bg)} .warn-bg{--c:var(--warn); --c-bg:var(--warn-bg)}
 
 /* ================= barra de filtros e abas ================= */
@@ -270,7 +270,7 @@ dialog footer{display:flex; gap:8px; align-items:center; padding:14px 20px; bord
 .cc{position:relative; overflow:hidden; border-radius:16px; padding:18px; color:#fff; min-height:150px; display:flex; flex-direction:column; background:linear-gradient(135deg, var(--cor), color-mix(in srgb, var(--cor) 45%, #120A20)); box-shadow:0 14px 30px -16px var(--cor); cursor:pointer; border:2px solid transparent; transition:transform .15s}
 .cc:hover{transform:translateY(-2px)}
 .cc.sel{border-color:var(--ouro)}
-.cc::after{content:""; position:absolute; right:-20px; bottom:-20px; width:150px; height:110px; background:#fff; opacity:.1; -webkit-mask:url(../img/dragao.png) center/contain no-repeat; mask:url(../img/dragao.png) center/contain no-repeat}
+.cc::after{content:""; position:absolute; right:14px; top:10px; width:78px; height:58px; background:#fff; opacity:.14; -webkit-mask:url(../img/dragao.png) center/contain no-repeat; mask:url(../img/dragao.png) center/contain no-repeat}
 .cc-nome{font-weight:700; font-size:16px} .cc-banco{opacity:.8; font-size:12.5px}
 .cc-meio{margin-top:auto}
 .cc .trilho{background:rgba(255,255,255,.25); height:6px; margin:8px 0 6px} .cc .trilho i{background:#fff}
@@ -359,3 +359,54 @@ li.ex .valor{font-weight:650; white-space:nowrap}
 li.ex select{grid-column:2/-1; padding:6px 9px; font-size:13px; border-radius:9px; border:1px solid var(--line); background:var(--surface)}
 li.ex .ex-motivo{grid-column:2/-1; font-size:11.5px; color:var(--ouro-txt)}
 li.ex.ign .ex-nome, li.ex.ign .valor{opacity:.5}
+
+/* ================= identidade Septim reforçada e cores mais vivas ================= */
+:root{--filete:linear-gradient(90deg, transparent, var(--ouro) 30%, var(--ouro) 70%, transparent); --brilho-roxo:color-mix(in srgb, var(--roxo-2) 16%, transparent); --brilho-ouro:color-mix(in srgb, var(--ouro) 10%, transparent)}
+:root[data-tema="escuro"]{--brilho-roxo:color-mix(in srgb, var(--roxo-2) 22%, transparent); --brilho-ouro:color-mix(in srgb, var(--ouro) 7%, transparent)}
+/* fundo com degradê roxo leve e um toque de dourado no canto */
+body{background:radial-gradient(1100px 620px at 88% -12%, var(--brilho-roxo), transparent 62%), radial-gradient(900px 520px at -8% 108%, var(--brilho-ouro), transparent 60%), var(--bg); background-attachment:fixed}
+.topo{background:color-mix(in srgb, var(--bg) 72%, transparent)}
+/* títulos na letra do logo */
+.titulo-pagina h1{font-family:Cinzel,Georgia,serif; font-size:24px; font-weight:700; letter-spacing:.04em}
+.card-cab h2{font-family:Cinzel,Georgia,serif; font-size:14.5px; font-weight:700; letter-spacing:.03em}
+.card-cab h2 .ic{color:var(--ouro-txt)}
+/* filete dourado no alto de cada cartão */
+.card,.kpi{position:relative}
+.card::before,.kpi::before{content:""; position:absolute; left:18px; right:18px; top:-1px; height:1.5px; background:var(--filete); opacity:.6; pointer-events:none; z-index:1}
+.kpi.destaque{border-color:color-mix(in srgb, var(--ouro) 45%, transparent)}
+.kpi-ic{box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--ouro) 30%, transparent)}
+/* menu: item ativo com barra dourada; dragão discreto no pé da barra lateral */
+.lateral{background:linear-gradient(180deg, var(--surface) 0%, color-mix(in srgb, var(--roxo-2) 7%, var(--surface)) 100%); isolation:isolate}
+.lateral::after{content:""; position:absolute; left:18px; right:18px; bottom:70px; height:130px; background:var(--ouro); opacity:.07; -webkit-mask:url(../img/dragao.png) center/contain no-repeat; mask:url(../img/dragao.png) center/contain no-repeat; pointer-events:none; z-index:-1}
+#menu a{position:relative}
+#menu a.ativo{background:linear-gradient(90deg, color-mix(in srgb, var(--roxo-2) 24%, transparent), transparent 90%); color:var(--ink)}
+#menu a.ativo::before{content:""; position:absolute; left:0; top:7px; bottom:7px; width:3px; border-radius:3px; background:var(--ouro); box-shadow:0 0 8px var(--ouro)}
+#menu a.ativo .ic{color:var(--ouro-txt)}
+.marca span{background:linear-gradient(180deg, var(--ink), color-mix(in srgb, var(--ouro) 70%, var(--ink))); -webkit-background-clip:text; background-clip:text; color:transparent}
+/* botões e destaques com mais vida */
+.btn.primario,.pilulas button.ativo,.fab{background:linear-gradient(135deg, var(--roxo-3), var(--roxo-2) 55%, color-mix(in srgb, var(--roxo-2) 70%, #2A1060)); border-color:transparent; box-shadow:0 6px 18px -8px var(--roxo-2), inset 0 1px 0 rgba(255,255,255,.2)}
+.fab{box-shadow:0 10px 26px -8px var(--roxo-2), 0 0 0 2px color-mix(in srgb, var(--ouro) 55%, transparent)}
+/* ícones de categoria mais coloridos */
+.cat-ic{background:color-mix(in srgb, var(--c) 24%, transparent); box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--c) 32%, transparent)}
+.trilho i{background:linear-gradient(90deg, var(--roxo-2), var(--roxo-3) 60%, var(--ouro))}
+.vazio-ic{background:radial-gradient(circle at 50% 40%, color-mix(in srgb, var(--ouro) 22%, transparent), var(--roxo-claro) 72%); color:var(--ouro-txt); box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--ouro) 30%, transparent)}
+.card-cab h2{min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-size:13.5px; letter-spacing:.02em}
+.card-cab small{white-space:nowrap; min-width:0; overflow:hidden; text-overflow:ellipsis; flex:0 1 auto}
+.card-cab h2{flex:1 0 auto; max-width:100%}
+
+/* ================= emblemas: grifo (Metas) e Oblivion (Dívidas) ================= */
+.kpi.destaque.emblema-grifo::after{-webkit-mask-image:url(../img/grifo.png); mask-image:url(../img/grifo.png); width:92px; height:108px; right:8px; opacity:.16}
+.kpi.destaque.emblema-oblivion::after{-webkit-mask-image:url(../img/oblivion.png); mask-image:url(../img/oblivion.png); width:70px; height:96px; right:14px; opacity:.16}
+.vazio-emblema{width:96px; height:110px; margin:0 auto 14px; background:linear-gradient(180deg, var(--ouro), color-mix(in srgb, var(--ouro) 55%, var(--roxo-2))); -webkit-mask-position:center; mask-position:center; -webkit-mask-size:contain; mask-size:contain; -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat; opacity:.9; filter:drop-shadow(0 6px 14px color-mix(in srgb, var(--ouro) 35%, transparent))}
+
+/* ================= espinhos: marca d'água fixa atrás de todo o painel ================= */
+.principal{isolation:isolate}
+.principal::before{content:""; position:fixed; top:54%; left:calc(50% + var(--lateral) / 2); width:min(78vmin, 760px); aspect-ratio:1; transform:translate(-50%, -50%);
+  background:linear-gradient(135deg, var(--roxo-3), var(--ouro)); opacity:.07; -webkit-mask:url(../img/espinhos.png) center/contain no-repeat; mask:url(../img/espinhos.png) center/contain no-repeat; pointer-events:none; z-index:-1}
+:root[data-tema="escuro"] .principal::before{opacity:.06}
+@media (max-width:900px){ .principal::before{left:50%; width:92vw} }
+@media print{ .principal::before{display:none} }
+/* cartões levemente translúcidos para os espinhos aparecerem por trás (efeito vidro) */
+.card,.kpi:not(.destaque),.pilulas,.alertas .aviso-item{background:color-mix(in srgb, var(--surface) 82%, transparent); backdrop-filter:blur(3px); -webkit-backdrop-filter:blur(3px)}
+.principal::before{opacity:.1}
+:root[data-tema="escuro"] .principal::before{opacity:.09}

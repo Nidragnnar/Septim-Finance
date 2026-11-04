@@ -78,7 +78,7 @@ export function render(el){
     <div class="grade g-2-1">
       <div class="card"><div class="card-cab"><h2>${ic('chart-column')}Receitas x despesas</h2><small>por mês</small></div><div class="card-corpo">
         ${graficoBarras({rotulos: dm.map(m => C.nomeMes(m.k, true)), series: [{nome: 'Receitas', cor: 'var(--pos)', valores: dm.map(m => m.r)}, {nome: 'Despesas', cor: 'var(--neg)', valores: dm.map(m => m.d)}]})}</div></div>
-      <div class="card"><div class="card-cab"><h2>${ic('chart-pie')}Gastos por categoria</h2><small>no período</small></div><div class="card-corpo">
+      <div class="card"><div class="card-cab"><h2>${ic('chart-pie')}Categorias</h2><small>despesas no período</small></div><div class="card-corpo">
         ${graficoRosca({itens: catAgora, sub: 'despesas'})}</div></div>
     </div>
     <div class="grade g2">

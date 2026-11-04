@@ -9,7 +9,7 @@ export function render(el){
   const guardado = ms.reduce((s, m) => s + C.acumuladoMeta(m), 0), alvo = ms.reduce((s, m) => s + m.alvo, 0);
   el.innerHTML = `<div class="filtros"><button class="btn primario" data-nova>${ic('plus')}Nova meta</button></div>
     ${ms.length ? `<div class="kpis">
-      <div class="kpi destaque"><div class="kpi-cab"><span class="kpi-ic">${ic('piggy-bank')}</span>Guardado nas metas</div><div class="kpi-v num">${brl(guardado)}</div><div class="kpi-s">de ${brl(alvo)} · ${pct(alvo ? guardado / alvo * 100 : 0)}</div></div>
+      <div class="kpi destaque emblema-grifo"><div class="kpi-cab"><span class="kpi-ic">${ic('piggy-bank')}</span>Guardado nas metas</div><div class="kpi-v num">${brl(guardado)}</div><div class="kpi-s">de ${brl(alvo)} · ${pct(alvo ? guardado / alvo * 100 : 0)}</div></div>
       <div class="kpi"><div class="kpi-cab"><span class="kpi-ic pos-bg">${ic('trophy')}</span>Atingidas</div><div class="kpi-v num">${ms.filter(m => C.acumuladoMeta(m) >= m.alvo).length} de ${ms.length}</div></div>
     </div>
     <div class="mini-cards">${ms.map(m => {
@@ -24,7 +24,7 @@ export function render(el){
         <div class="mc-nums" style="font-size:12.5px"><span>${pct(p)}</span><span>${falta ? `faltam ${brl(falta)}${meses ? ` · ${brl(Math.ceil(falta / meses))}/mês` : ''}` : '<span class="txt-pos">meta atingida!</span>'}</span></div>
         <div class="mc-acoes"><button class="btn pequeno primario" data-dep="${m.id}">${ic('plus')}Depositar</button><button class="btn pequeno" data-hist="${m.id}">${ic('history')}Histórico (${(m.depositos || []).length})</button></div>
       </div>`; }).join('')}</div>`
-    : `<div class="card">${vazio('target', 'Nenhuma meta ainda', 'Reserva de emergência, viagem, carro, computador… Defina o valor e a data, e acompanhe o progresso a cada depósito.', `<button class="btn primario" data-nova>${ic('plus')}Criar primeira meta</button>`)}</div>`}`;
+    : `<div class="card">${vazio('target', 'Nenhuma meta ainda', 'Reserva de emergência, viagem, carro, computador… Defina o valor e a data, e acompanhe o progresso a cada depósito.', `<button class="btn primario" data-nova>${ic('plus')}Criar primeira meta</button>`, 'grifo')}</div>`}`;
   el.onclick = e => {
     const b = e.target.closest('button'); if(!b) return;
     if(b.dataset.nova !== undefined) return F.formMeta();

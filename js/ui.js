@@ -122,8 +122,9 @@ export const opcoesCartoes = () => estado.cartoes.map(c => [c.id, c.nome]);
 export const FORMAS = [['pix', 'Pix'], ['debito', 'Cartão de débito'], ['credito', 'Cartão de crédito'], ['dinheiro', 'Dinheiro'], ['boleto', 'Boleto'], ['transferencia', 'Transferência'], ['debito-auto', 'Débito automático']];
 
 /* ================= blocos ================= */
-export const vazio = (icone, titulo, texto, acao = '') => `<div class="vazio">
-  <div class="vazio-ic">${ic(icone)}</div><h3>${titulo}</h3><p>${texto}</p>${acao}</div>`;
+// imagem: nome de um emblema em img/ (grifo, oblivion) no lugar do ícone
+export const vazio = (icone, titulo, texto, acao = '', imagem = '') => `<div class="vazio">
+  ${imagem ? `<div class="vazio-emblema" style="-webkit-mask-image:url(img/${imagem}.png);mask-image:url(img/${imagem}.png)"></div>` : `<div class="vazio-ic">${ic(icone)}</div>`}<h3>${titulo}</h3><p>${texto}</p>${acao}</div>`;
 export const chipCategoria = id => { const c = categoria(id); return `<span class="cat-ic" style="--c:${c.cor}">${ic(c.icone || 'circle')}</span>`; };
 export const barra = (pctV, cor) => `<div class="trilho"><i style="width:${Math.max(0, Math.min(100, pctV)).toFixed(1)}%;${cor ? 'background:' + cor : ''}"></i></div>`;
 

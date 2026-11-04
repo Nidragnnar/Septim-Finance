@@ -12,7 +12,7 @@ export function render(el){
   const mensal = ativas.reduce((s, d) => s + d.valorParcela, 0);
   el.innerHTML = `<div class="filtros"><button class="btn primario" data-nova>${ic('plus')}Nova dívida</button></div>
     ${ds.length ? `<div class="kpis">
-      <div class="kpi destaque"><div class="kpi-cab"><span class="kpi-ic">${ic('hand-coins')}</span>Falta quitar</div><div class="kpi-v num">${brl(falta)}</div><div class="kpi-s">${ativas.length} ${ativas.length === 1 ? 'dívida ativa' : 'dívidas ativas'}</div></div>
+      <div class="kpi destaque emblema-oblivion"><div class="kpi-cab"><span class="kpi-ic">${ic('hand-coins')}</span>Falta quitar</div><div class="kpi-v num">${brl(falta)}</div><div class="kpi-s">${ativas.length} ${ativas.length === 1 ? 'dívida ativa' : 'dívidas ativas'}</div></div>
       <div class="kpi"><div class="kpi-cab"><span class="kpi-ic pos-bg">${ic('circle-check-big')}</span>Já pago</div><div class="kpi-v num">${brl(pago)}</div><div class="kpi-s">${pct(total ? pago / total * 100 : 0)} do total</div>${barra(total ? pago / total * 100 : 0, 'var(--pos)')}</div>
       <div class="kpi"><div class="kpi-cab"><span class="kpi-ic warn-bg">${ic('calendar')}</span>Parcelas por mês</div><div class="kpi-v num">${brl(mensal)}</div><div class="kpi-s">somando as ativas</div></div>
       <div class="kpi"><div class="kpi-cab"><span class="kpi-ic neg-bg">${ic('percent')}</span>Juros no total</div><div class="kpi-v num">${brl(juros)}</div><div class="kpi-s">parcelas menos valor original</div></div>
@@ -29,7 +29,7 @@ export function render(el){
         ${prox ? `<div class="nota ${atras ? 'alerta' : ''}" style="margin:0">Próxima: parcela ${prox.n} · ${atras ? 'atrasada desde' : 'vence'} ${data(prox.vencimento)}</div>` : ''}
         <div class="mc-acoes">${r ? `<button class="btn pequeno primario" data-pagar="${d.id}">${ic('banknote')}Pagar parcela</button>` : ''}<button class="btn pequeno" data-hist="${d.id}">${ic('list')}Parcelas e pagamentos</button></div>
       </div>`; }).join('')}</div>`
-    : `<div class="card">${vazio('hand-coins', 'Nenhuma dívida cadastrada', 'Empréstimos, financiamentos, acordos… Cadastre com o valor das parcelas e acompanhe quanto falta para quitar. Cada pagamento sai da conta e entra nas despesas do mês.', `<button class="btn primario" data-nova>${ic('plus')}Nova dívida</button>`)}</div>`}`;
+    : `<div class="card">${vazio('hand-coins', 'Nenhuma dívida cadastrada', 'Empréstimos, financiamentos, acordos… Cadastre com o valor das parcelas e acompanhe quanto falta para quitar. Cada pagamento sai da conta e entra nas despesas do mês.', `<button class="btn primario" data-nova>${ic('plus')}Nova dívida</button>`, 'oblivion')}</div>`}`;
   el.onclick = e => {
     const b = e.target.closest('button'); if(!b) return;
     if(b.dataset.nova !== undefined) return F.formDivida();
