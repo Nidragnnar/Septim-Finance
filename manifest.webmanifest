@@ -1,7 +1,7 @@
 {
   "name": "Septim",
   "short_name": "Septim",
-  "description": "Gastos do dia a dia, contas fixas, parcelas e reserva do mês.",
+  "description": "Gestão financeira pessoal: contas, cartões, metas, investimentos e dívidas.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
@@ -9,7 +9,7 @@
   "theme_color": "#2A1748",
   "lang": "pt-BR",
   "icons": [
-    { "src": "icone-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
-    { "src": "icone-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+    { "src": "img/icone-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "img/icone-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
   ]
 }
