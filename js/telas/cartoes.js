@@ -57,7 +57,7 @@ export function render(el){
 }
 
 const linhaParcela = p => `<li class="linha">${chipCategoria(p.compra.categoriaId)}
-  <div class="meio"><b>${esc(p.compra.descricao)}${p.total > 1 ? ` <span class="tag roxo">${p.n}/${p.total}</span>` : ''}</b><small>comprado em ${data(p.compra.data)} · ${esc(categoria(p.compra.categoriaId).nome)}${p.total > 1 ? ' · total ' + brl(p.compra.valor) : ''}</small></div>
+  <div class="meio"><b>${esc(p.compra.descricao)}${p.total > 1 ? ` <span class="tag roxo">${p.n}/${p.total}</span>` : ''}${p.compra.recorrenciaId ? ' <span class="tag roxo">assinatura</span>' : ''}</b><small>comprado em ${data(p.compra.data)} · ${esc(categoria(p.compra.categoriaId).nome)}${p.total > 1 ? ' · total ' + brl(p.compra.valor) : ''}</small></div>
   <span class="valor">${brl(p.valor)}</span>
   <span class="acoes"><button class="icone-btn mini" data-acao="compra:${p.compra.id}" title="Editar compra">${ic('pencil')}</button><button class="icone-btn mini perigo" data-acao="compra:${p.compra.id}:x" title="Excluir compra">${ic('trash-2')}</button></span></li>`;
 

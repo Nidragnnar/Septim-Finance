@@ -9,6 +9,7 @@ import * as dashboard from './telas/dashboard.js';
 import * as lanc from './telas/lancamentos.js';
 import * as contas from './telas/contas.js';
 import * as cartoes from './telas/cartoes.js';
+import * as assinaturas from './telas/assinaturas.js';
 import * as planejamento from './telas/planejamento.js';
 import * as metas from './telas/metas.js';
 import * as investimentos from './telas/investimentos.js';
@@ -24,6 +25,7 @@ const TELAS = {
   despesas: {nome: 'Despesas', icone: 'arrow-up-right', sub: 'Contas, compras e gastos', tela: {render: el => lanc.porTipo(el, 'despesa')}},
   contas: {nome: 'Contas', icone: 'wallet', sub: 'Bancos, carteiras e dinheiro', tela: contas},
   cartoes: {nome: 'Cartões', icone: 'credit-card', sub: 'Limites e faturas', tela: cartoes},
+  assinaturas: {nome: 'Assinaturas', icone: 'repeat', sub: 'Cobranças que repetem sozinhas', tela: assinaturas},
   sep1: null,
   planejamento: {nome: 'Planejamento', icone: 'chart-pie', sub: 'Orçamento do mês por categoria', tela: planejamento},
   metas: {nome: 'Metas', icone: 'target', sub: 'Seus objetivos', tela: metas},

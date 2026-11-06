@@ -52,7 +52,7 @@ function todosItens(ini, fim){
   estado.transferencias.filter(t => entre(t.data, ini, fim)).forEach(t => out.push({tipo: 'transferencia', data: t.data, valor: 0, x: t, busca: t.descricao + ' transferência', contas: [t.deId, t.paraId], status: 'pago'}));
   estado.compras.filter(c => entre(c.data, ini, fim)).forEach(c => out.push({tipo: 'cartao', data: c.data, valor: -c.valor, x: c, busca: c.descricao, contas: [], cat: c.categoriaId, status: 'pago'}));
   estado.pagamentosFatura.filter(p => entre(p.data, ini, fim)).forEach(p => out.push({tipo: 'outros', sub: 'fatura', data: p.data, valor: -p.valor, x: p, busca: 'fatura', contas: [p.contaId], status: 'pago'}));
-  estado.dividas.forEach(d => (d.pagamentos || []).filter(p => entre(p.data, ini, fim)).forEach(p => out.push({tipo: 'outros', sub: 'divida', data: p.data, valor: -p.valor, x: p, d, busca: d.credor + ' dívida parcela', contas: [p.contaId], cat: 'dividas', status: 'pago'})));
+  estado.dividas.forEach(d => (d.pagamentos || []).filter(p => !p.anterior && entre(p.data, ini, fim)).forEach(p => out.push({tipo: 'outros', sub: 'divida', data: p.data, valor: -p.valor, x: p, d, busca: d.credor + ' dívida parcela', contas: [p.contaId], cat: 'dividas', status: 'pago'})));
   estado.investimentos.forEach(i => (i.movimentos || []).filter(m => entre(m.data, ini, fim)).forEach(m => out.push({tipo: 'outros', sub: 'invest', data: m.data, valor: m.tipo === 'resgate' ? m.valor : -m.valor, x: m, i, busca: i.nome + ' investimento', contas: [m.contaId], status: 'pago'})));
   return out.sort((a, b) => b.data.localeCompare(a.data));
 }

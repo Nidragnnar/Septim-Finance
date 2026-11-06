@@ -1,6 +1,6 @@
 // Formulários de cadastro e edição. Toda gravação passa por alterar(), que guarda histórico e permite desfazer.
 import {estado, uid, alterar, achar, categoria} from './dados.js';
-import {saldoConta, hoje, gerarRecorrencias, somaMeses, parcelasDaCompra, nomeMes, fatura, faturaAtualKey, partes, totalDivida, pagoDivida, proximaParcela, acumuladoMeta, valorInvestimento, chaveMes, limiteUsado} from './calc.js';
+import {ocorrencias, somaDias, saldoConta, hoje, gerarRecorrencias, somaMeses, parcelasDaCompra, nomeMes, fatura, faturaAtualKey, partes, totalDivida, pagoDivida, proximaParcela, acumuladoMeta, valorInvestimento, chaveMes, limiteUsado} from './calc.js';
 import {$, esc, brl, lerValor, valorCampo, data, campo, abrirModal, confirmar, toast, opcoesContas, opcoesCategorias, opcoesCartoes, FORMAS, ic} from './ui.js';
 
 const ok = (texto, fn) => toast(texto, alterar(texto, fn));
@@ -123,7 +123,61 @@ export async function encerrarRecorrencia(r){
   ok('Repetição encerrada', e => {
     const x = e.recorrencias.find(y => y.id === r.id); x.ativa = false; x.fim = h;
     e.transacoes = e.transacoes.filter(t => !(t.recorrenciaId === r.id && !t.pagoEm && t.data > h));
+    e.compras = e.compras.filter(c => !(c.recorrenciaId === r.id && c.data > h));
   });
+}
+
+/* ================= assinaturas ================= */
+export function formAssinatura(a = null){
+  const ativas = estado.contas.filter(c => !c.arquivada);
+  if(!ativas.length && !estado.cartoes.length) return abrirModal({titulo: 'Assinatura', corpo: '<p class="nota">Cadastre um cartão ou uma conta antes: é de onde a assinatura é cobrada.</p>'});
+  const meios = [...estado.cartoes.map(c => ['c:' + c.id, 'Cartão · ' + c.nome]), ...ativas.map(c => ['a:' + c.id, 'Conta · ' + c.nome])];
+  const v = a || {descricao: '', valor: 0, categoriaId: 'assinaturas', frequencia: 'mensal', inicio: hoje()};
+  const meio = a ? (a.cartaoId ? 'c:' + a.cartaoId : 'a:' + a.contaId) : meios[0][0];
+  abrirModal({
+    titulo: a ? 'Editar assinatura' : 'Nova assinatura', botao: a ? 'Salvar' : 'Adicionar',
+    corpo: `<div class="grade-form">
+      ${campo('text', 'descricao', 'Nome', v.descricao, {obrigatorio: true, placeholder: 'Netflix, Spotify, Google Drive…'})}
+      ${campo('valor', 'valor', 'Valor', valorCampo(v.valor), {obrigatorio: true})}
+      ${campo('select', 'meio', 'Cobrada em', meio, {opcoes: meios})}
+      ${campo('select', 'frequencia', 'Repete', v.frequencia, {opcoes: [['mensal', 'Todo mês'], ['anual', 'Todo ano']]})}
+      ${campo('date', 'inicio', a ? 'Dia da cobrança (a partir de)' : 'Primeira cobrança', a ? (proximaData(a) || v.inicio) : v.inicio)}
+      ${campo('select', 'categoriaId', 'Categoria', v.categoriaId, {opcoes: opcoesCategorias('despesa')})}
+    </div><p class="nota">No cartão, cada cobrança entra sozinha na fatura do mês. Na conta, aparece nas despesas para você marcar como paga.${a ? ' Mudanças valem para as próximas cobranças; as que já passaram ficam como estão.' : ''}</p>`,
+    aoSalvar: d => {
+      const valor = lerValor(d.valor), desc = d.descricao.trim();
+      if(!desc) return 'Informe o nome.';
+      if(!(valor > 0)) return 'Informe um valor maior que zero.';
+      if(!dataValida(d.inicio)) return 'Informe a data da cobrança.';
+      const [tipoMeio, idMeio] = d.meio.split(':');
+      const dados = {descricao: desc, valor, categoriaId: d.categoriaId, frequencia: d.frequencia, dia: partes(d.inicio)[2],
+        cartaoId: tipoMeio === 'c' ? idMeio : '', contaId: tipoMeio === 'a' ? idMeio : ''};
+      if(!a){
+        ok('Assinatura criada', e => { e.recorrencias.push({id: uid(), tipo: 'despesa', assinatura: true, ...dados, inicio: d.inicio, fim: '', ativa: true, gerados: [], forma: tipoMeio === 'c' ? 'credito' : '', origem: '', obs: ''}); gerarRecorrencias(e); });
+        return;
+      }
+      // editar: as cobranças futuras saem e são geradas de novo com os dados novos (mesmos ids, então nada fica marcado como apagado)
+      const h = hoje();
+      ok('Assinatura atualizada', e => {
+        const r = e.recorrencias.find(x => x.id === a.id);
+        // só as cobranças a partir da data escolhida (nunca antes de hoje) recebem os dados novos
+        const corte = d.inicio > h ? d.inicio : h;
+        const sai = new Set([...e.transacoes.filter(t => t.recorrenciaId === r.id && !t.pagoEm && t.data >= corte), ...e.compras.filter(c => c.recorrenciaId === r.id && c.data >= corte)].map(x => x.id));
+        e.transacoes = e.transacoes.filter(t => !sai.has(t.id)); e.compras = e.compras.filter(c => !sai.has(c.id));
+        r.gerados = (r.gerados || []).filter(k => !sai.has(r.id + ':' + k));
+        Object.assign(r, dados, {inicio: r.inicio <= d.inicio ? r.inicio : d.inicio});
+        // a nova data vale a partir dela: meses antes dela que já foram cobrados ficam como estavam
+        if(d.inicio > r.inicio) r.gerados = [...new Set([...r.gerados, ...ocorrencias({...r, inicio: r.inicio}, somaDias(d.inicio, -1)).map(x => r.frequencia === 'anual' ? x.slice(0, 4) : chaveMes(x))])];
+        r.forma = tipoMeio === 'c' ? 'credito' : '';
+        gerarRecorrencias(e);
+      });
+    },
+  });
+}
+// próxima cobrança, para mostrar no formulário
+function proximaData(r){ const h = hoje(); return ocorrencias(r, somaMeses(h, 13)).find(d => d >= h); }
+export function reativarAssinatura(r){
+  ok('Assinatura reativada', e => { const x = e.recorrencias.find(y => y.id === r.id); x.ativa = true; x.fim = ''; gerarRecorrencias(e); });
 }
 
 /* ================= transferências ================= */
@@ -407,8 +461,28 @@ export function formDivida(dv = null){
       ${campo('valor', 'valorParcela', 'Valor da parcela', valorCampo(v.valorParcela), {obrigatorio: true})}
       ${campo('month', 'inicio', '1ª parcela em', v.inicio)}
       ${campo('number', 'diaVencimento', 'Dia do vencimento', v.diaVencimento, {min: 1, max: 31})}
-      ${dv ? '' : campo('number', 'jaPagas', 'Parcelas já pagas antes', 0, {min: 0, dica: 'Entram no histórico sem mexer no saldo das contas.'})}
-    </div>`,
+      ${campo('number', 'jaPagas', 'Parcelas pagas antes de usar o Septim', dv ? (dv.pagamentos || []).filter(p => p.anterior).length : 0, {min: 0, dica: 'Contam no progresso da dívida, mas não mexem no saldo das contas nem nas despesas dos meses.'})}
+    </div><p class="nota" id="previaDivida"></p>`,
+    aoAbrir: f => {
+      // pagas depois de entrar no Septim (pela conta): continuam contando
+      const novas = dv ? (dv.pagamentos || []).filter(p => !p.anterior) : [];
+      let mexeuNoInicio = false;
+      f.inicio.addEventListener('input', () => { mexeuNoInicio = true; });
+      const previa = ev => {
+        const ja = Math.max(0, Math.round(+f.jaPagas.value) || 0), n = Math.round(+f.parcelas.value) || 0, dia = Math.round(+f.diaVencimento.value) || 1;
+        // mudou a quantidade já paga e não escolheu o mês à mão: a próxima parcela vence este mês (ou no próximo, se já pagou este)
+        if(ev && ev.target === f.jaPagas && !mexeuNoInicio){
+          const k = chaveMes(hoje()), pagouEste = novas.some(p => chaveMes(p.data) === k);
+          f.inicio.value = chaveMes(somaMeses(k + '-01', -(ja + novas.length) + (pagouEste ? 1 : 0)));
+        }
+        if(!/^\d{4}-\d{2}$/.test(f.inicio.value) || !n) return;
+        const pagas = ja + novas.length, [a, m] = partes(f.inicio.value + '-01');
+        const prox = pagas + 1, venc = somaMeses(`${a}-${String(m).padStart(2, '0')}-01`, pagas, dia);
+        $('#previaDivida').innerHTML = pagas >= n ? 'Com isso, a dívida fica <b>quitada</b>.'
+          : `Com isso: <b>${pagas} de ${n}</b> pagas · próxima é a <b>${prox}ª</b>, vence <b>${data(venc)}</b>${venc < hoje() ? ' <span class="txt-neg">(já passou: confira o mês da 1ª parcela)</span>' : ''}.`;
+      };
+      f.addEventListener('input', previa); f.addEventListener('change', previa); previa();
+    },
     aoSalvar: d => {
       const original = lerValor(d.valorOriginal), parcela = lerValor(d.valorParcela), n = Math.round(+d.parcelas), dia = Math.round(+d.diaVencimento);
       const juros = d.juros.trim() ? Number(d.juros.replace(',', '.')) : 0, ja = Math.round(+d.jaPagas || 0);
@@ -421,12 +495,15 @@ export function formDivida(dv = null){
       if(!(dia >= 1 && dia <= 31)) return 'Dia do vencimento: de 1 a 31.';
       if(ja < 0 || ja > n) return 'Parcelas já pagas: de 0 até o total.';
       const dados = {credor: d.credor.trim(), descricao: d.descricao.trim(), valorOriginal: original, juros, parcelas: n, valorParcela: parcela, inicio: d.inicio, diaVencimento: dia};
-      if(dv){
-        if(n < (dv.pagamentos || []).length) return 'Já há mais pagamentos do que essa quantidade de parcelas.';
-        ok('Dívida atualizada', e => Object.assign(e.dividas.find(x => x.id === dv.id), dados)); return;
-      }
+      // parcelas de antes do Septim: as primeiras do cronograma, sem conta (não mexem no saldo)
       const [a, m] = partes(d.inicio + '-01');
-      const pagamentos = Array.from({length: ja}, (_, i) => ({id: uid(), valor: parcela, data: somaMeses(`${a}-${String(m).padStart(2, '0')}-01`, i, dia), contaId: '', anterior: true}));
+      const antigas = (lista = []) => Array.from({length: ja}, (_, i) => ({id: (lista[i] || {}).id || uid(), valor: (lista[i] || {}).valor || parcela, data: somaMeses(`${a}-${String(m).padStart(2, '0')}-01`, i, dia), contaId: '', anterior: true}));
+      if(dv){
+        const novas = (dv.pagamentos || []).filter(p => !p.anterior);
+        if(ja + novas.length > n) return 'Parcelas pagas (antes e depois do Septim) passam do total de parcelas.';
+        ok('Dívida atualizada', e => { const x = e.dividas.find(y => y.id === dv.id); Object.assign(x, dados); x.pagamentos = [...antigas((dv.pagamentos || []).filter(p => p.anterior)), ...novas]; }); return;
+      }
+      const pagamentos = antigas();
       ok('Dívida adicionada', e => e.dividas.push({id: uid(), ...dados, pagamentos, criadoEm: Date.now()}));
     },
   });
@@ -439,14 +516,15 @@ export function formPagarDivida(dv){
     corpo: `<p class="nota">${p ? `Parcela ${p.n} de ${dv.parcelas} · vence ${data(p.vencimento)}` : ''} · falta ${brl(falta)}</p><div class="grade-form">
       ${campo('valor', 'valor', 'Valor pago', valorCampo(Math.min(dv.valorParcela, falta)), {obrigatorio: true})}
       ${campo('date', 'data', 'Data', hoje())}
-      ${campo('select', 'contaId', 'Conta', '', {opcoes: opcoesContas(), largo: true})}
-    </div><p class="nota">O pagamento sai da conta e entra nas despesas do mês, na categoria Dívidas.</p>`,
+      ${campo('select', 'contaId', 'Conta', '', {opcoes: [...opcoesContas(), ['__antes', 'Nenhuma: paguei antes de usar o Septim']], largo: true})}
+    </div><p class="nota">O pagamento sai da conta e entra nas despesas do mês, na categoria Dívidas. Se foi pago antes de você usar o Septim, escolha “Nenhuma”: conta só no progresso da dívida.</p>`,
     aoSalvar: d => {
       const valor = lerValor(d.valor);
       if(!(valor > 0)) return 'Informe um valor maior que zero.';
       if(!d.contaId) return precisaConta() || 'Escolha a conta.';
       if(!dataValida(d.data)) return 'Informe uma data válida.';
-      ok('Parcela paga', e => e.dividas.find(x => x.id === dv.id).pagamentos.push({id: uid(), valor, data: d.data, contaId: d.contaId}));
+      const antes = d.contaId === '__antes';
+      ok('Parcela paga', e => e.dividas.find(x => x.id === dv.id).pagamentos.push({id: uid(), valor, data: d.data, contaId: antes ? '' : d.contaId, ...(antes ? {anterior: true} : {})}));
     },
   });
 }
@@ -468,10 +546,11 @@ export function acaoRapida(){
       <button type="button" data-r="despesa" class="r-despesa">${ic('arrow-up-right')}<b>Despesa</b><small>Conta, compra, gasto</small></button>
       <button type="button" data-r="transferencia" class="r-transf">${ic('arrow-left-right')}<b>Transferência</b><small>Entre suas contas</small></button>
       <button type="button" data-r="cartao" class="r-cartao">${ic('credit-card')}<b>Compra no cartão</b><small>À vista ou parcelada</small></button>
+      <button type="button" data-r="assinatura" class="r-assinatura">${ic('repeat')}<b>Assinatura</b><small>Cobra sozinha todo mês</small></button>
     </div>`,
     aoAbrir: f => f.querySelectorAll('[data-r]').forEach(b => b.onclick = () => {
       const r = b.dataset.r; $('#modal').close();
-      setTimeout(() => r === 'transferencia' ? formTransferencia() : r === 'cartao' ? formCompra() : formTransacao(r), 30);
+      setTimeout(() => r === 'transferencia' ? formTransferencia() : r === 'cartao' ? formCompra() : r === 'assinatura' ? formAssinatura() : formTransacao(r), 30);
     }),
   });
 }

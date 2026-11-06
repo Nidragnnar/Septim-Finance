@@ -157,7 +157,7 @@ export function despesasEntre(ini, fim){
   estado.transacoes.filter(t => t.tipo === 'despesa' && entre(t.data, ini, fim)).forEach(t => out.push({data: t.data, valor: t.valor, categoriaId: t.categoriaId, descricao: t.descricao, origem: 'conta', contaId: t.contaId, tx: t}));
   estado.compras.forEach(c => parcelasDaCompra(c).filter(p => entre(p.vencimento, ini, fim)).forEach(p =>
     out.push({data: p.vencimento, valor: p.valor, categoriaId: c.categoriaId, descricao: c.descricao + (p.total > 1 ? ` (${p.n}/${p.total})` : ''), origem: 'cartao', cartaoId: c.cartaoId, compra: c})));
-  estado.dividas.forEach(d => (d.pagamentos || []).filter(p => entre(p.data, ini, fim)).forEach(p =>
+  estado.dividas.forEach(d => (d.pagamentos || []).filter(p => !p.anterior && entre(p.data, ini, fim)).forEach(p =>
     out.push({data: p.data, valor: p.valor, categoriaId: 'dividas', descricao: 'Parcela · ' + d.credor, origem: 'divida', contaId: p.contaId})));
   return out;
 }
@@ -221,8 +221,9 @@ export function gerarRecorrencias(e){
       const key = r.frequencia === 'anual' ? d.slice(0, 4) : chaveMes(d);
       // id fixo por repetição e mês: dois aparelhos gerando o mesmo mês não duplicam, e o que você apagou continua apagado
       const id = `${r.id}:${key}`;
-      if(r.gerados.includes(key) || (e.apagados && e.apagados[id]) || e.transacoes.some(t => t.id === id)){ if(!r.gerados.includes(key)) r.gerados.push(key); return; }
+      if(r.gerados.includes(key) || (e.apagados && e.apagados[id]) || e.transacoes.some(t => t.id === id) || e.compras.some(c => c.id === id)){ if(!r.gerados.includes(key)) r.gerados.push(key); return; }
       r.gerados.push(key); n++;
+      if(r.cartaoId){ e.compras.push({id, cartaoId: r.cartaoId, descricao: r.descricao, valor: r.valor, parcelas: 1, data: d, categoriaId: r.categoriaId, recorrenciaId: r.id, criadoEm: Date.now()}); return; }
       e.transacoes.push({id, tipo: r.tipo, descricao: r.descricao, valor: r.valor, categoriaId: r.categoriaId, contaId: r.contaId,
         data: d, pagoEm: null, forma: r.forma || '', origem: r.origem || '', recorrenciaId: r.id, criadoEm: Date.now()});
     });
